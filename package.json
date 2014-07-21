@@ -1,8 +1,7 @@
 {
-  "name": "mri-slicer",
+  "name": "3d-array-image-slicer",
   "version": "0.0.1",
-  "description": "generates a three paned set of 2d views which
-   slices the brain based on the user's mouse position",
+  "description": "Generates a dynamic 3-paned/3-axis image slicer from a 3d heatmap data array",
   "main": "source.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
