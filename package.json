@@ -1,0 +1,15 @@
+{
+  "name": "3d-array-image-slicer",
+  "version": "0.0.1",
+  "description": "Generates a dynamic 3-paned/3-axis image slicer from a 3d heatmap data array",
+  "main": "source.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "S.PLIS",
+  "license": "ISC",
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-contrib-uglify": "^0.5.0"
+  }
+}
