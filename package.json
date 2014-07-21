@@ -1,0 +1,16 @@
+{
+  "name": "mri-slicer",
+  "version": "0.0.1",
+  "description": "generates a three paned set of 2d views which
+   slices the brain based on the user's mouse position",
+  "main": "source.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "S.PLIS",
+  "license": "ISC",
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-contrib-uglify": "^0.5.0"
+  }
+}
