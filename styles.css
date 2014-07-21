@@ -22,3 +22,9 @@ body {
 .tile {
   shape-rendering: crispEdges;
 }
+
+canvas {
+    position: "absolute";
+    margin: 20px 90px 30px 50px;
+    cursor: crosshair;
+}
