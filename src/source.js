@@ -27,6 +27,7 @@
         dx, dy, dz,             // px, cube width, height, depth
         defX, defY, defZ,       // int, default view positions
         heatmap,                // Array, 3d data to render
+        idleIntvl, idleAniIntvl,   // defines time-based idle activity
         minFrameRenderTime,     // ms, permit at least this time between redraw-calls during animation
         height, width,          // int, canvas dimensions
         reset, resetInterval,   // Timeout, function to reset panes
@@ -39,6 +40,7 @@
 
 
     /**
+     * TODO: UNUSED - PURGE?
      * Averages values of surround values in cube array
      * @param  {Number} cubeRadius - number of sub elements on
      * either side of cube array center to include in average
@@ -142,9 +144,8 @@
         jQuery("#slicer_loading").fadeOut(1000, function fadeMRIslicerIn() {
             var jqC = jQuery("canvas");
             jQuery("canvas").toggle("slide");
-            //(1000).fadeIn();
         });
-
+        idleAnimation(true);
     }
 
 
@@ -220,12 +221,45 @@
      * canvas to demonstrate it's ability without user
      * interaction
      * @param  {Boolean} enable - turn the feature on or off
-     * @return {Timeout|null}
      */
     function idleAnimation (enable) {
-        // when true, if timer already exists return it
-        // when false, if timer doesn't exists, return null
-        // set interval on THIS, sway canvas back and forth every 15s
+        if (!enable) {
+            clearInterval(idleIntvl);
+            idleIntvl = null;
+            clearInterval(idleAniIntvl);
+            idleAniIntvl = null;
+            return;
+        }
+        idleIntvl = setInterval(function scheduleIdleAnimation () {
+            if (idleAniIntvl) return;
+            var smallestAniAxis = d3.min([dx, dy, dz]),
+                moveCount = 0,
+                defAni, aniPos;
+            if (smallestAniAxis === dx) {
+                defAni = defX;
+                aniPos = 'x';
+            } else if (smallestAniAxis === dy) {
+                defAni = defY;
+                aniPos = 'y';
+            } else {
+                defAni = defZ;
+                aniPos = 'z';
+            }
+            idleAniIntvl = setInterval(function animateLateralScroll () {
+                if (moveCount < defAni/2) --pos[aniPos];
+                else if (moveCount < defAni*1.5) ++pos[aniPos];
+                else if (moveCount < defAni*2) --pos[aniPos];
+                else {
+                    clearInterval(idleAniIntvl);
+                    idleAniIntvl = null;
+                }
+                drawImage(ctx, heatmap, dy+gap, 0, dy, height, pos[aniPos], 0);
+                drawImage(ctx, heatmap, 2*dy+2*gap+gap, 0, dx, height, pos[aniPos], 1);
+                drawImage(ctx, heatmap, 0, 0, dy, height, pos[aniPos], 2);
+                ++moveCount;
+
+            }, minFrameRenderTime);
+        }, 10000);
     }
 
 
@@ -317,7 +351,7 @@
              * Animates the MRI panes to their default positions
              */
             clearGauge();
-                resetInterval = setInterval(function animateReset () {
+            resetInterval = setInterval(function animateReset () {
                 pos.x += revertInc.x;
                 pos.y += revertInc.y;
                 pos.z += revertInc.z;
