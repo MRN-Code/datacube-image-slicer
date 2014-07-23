@@ -3,13 +3,21 @@
 <head>
     <meta charset="utf-8">
     <title>Axial and dynamic view</title>
-    <script src="d3.v3.min.js" charset="utf-8"></script>
-    <script type="text/javascript">
-        ieCanvasPolyfill = {}; // load in real polyfill and update source closure
-    </script>
-    <script src="source.js" charset="utf-8"></script>
-    <style src="styles.css" type="text/css"></style>
+    <link rel="stylesheet" type="text/css" href="dist/styles.min.css">
+    <script src="lib/d3.v3.min.js" charset="utf-8"></script>
+    <script src="lib/jquery-1.11.1.min.js" charset="utf-8"></script>
+    <script src="lib/jquery-ui.min.js" charset="utf-8"></script>
+    <!--[if IE]>
+        <script type="text/javascript" src="lib/excanvas/excanvas.compiled.js"></script>
+    <![endif]-->
+    <script src="dist/source.min.js" charset="utf-8"></script>
 </head>
     <body>
+        <div id="canvas_wrapper">
+            <div id="slicer_loading">
+                <img id="loading_brain" src="img/brain_flat.png"></img>
+                <p id="loading_brain_text">Loading MRI Data</p>
+            </div>
+        </div>
     </body>
 </html>
