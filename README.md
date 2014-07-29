@@ -1,16 +1,18 @@
 datacube image slicer
 ======
 
-Generates an interactive, dynamic 3-paned/3-axis image 'slicer' from a 3d data array.  As the user moves the mouse over the canvas, the paired images update based on the cross-sectioned coordinates of the pointer.
+Generates an interactive 3-paned image 'slicer' from a three dimensional data array.  As the user moves the mouse over the canvas, the paired images update based on the cross-sectioned coordinates of the pointer.
 
 ![](https://raw.githubusercontent.com/MRN-Code/datacube-image-slicer/master/img/mri_animated.gif)
 
 ## Install
-* Works both via `<script>` tag or commonjs `require('datacube-slicer`)`.
-* Clone this repo
-* run `npm install` to install the dependencies
-* run `grunt` to build the js and css files
-* Open index.html and enjoy!
+* Works both via `<script>` tag or commonjs `var datacubeSlicer = require('datacube-slicer');`.
+* Clone this repo, `git clone https://github.com/MRN-Code/datacube-image-slicer.git` then `cd` into the cloned directory
+* `npm install` to install the dependencies
+* `grunt` to build the js
+* Build a config object, as described below
+* Build the pane: ```var yourSlicerPane = new datacubeSlicer(yourConfigObject);```
+* Source via `<script src="dist/datacube.img.slicer.min.js" type="text/javascript" charset="utf-8"></script>` or use the module.
 
 ## Configure
 ```javascript
@@ -31,10 +33,11 @@ var yourConfiguration = {
 
 ## Examples
 * See `test/window/index.html` or `test/commonjs/index.html` in your browser, post-repo pull.
+* I enjoy using [httpster](https://www.npmjs.org/package/httpster) to serve up static files quickly, especially just to see quick demo!
 
 ## Dependencies
 * If using `npm`, `npm install` should install your dependencies.
-* If injecting as a source script directly in your app, 'd3' must be on the window scope.
+* If injecting as a source script directly in your app, [d3](http://d3js.org/) must be on the window scope.
 * Load excanvas for old IE canvas support.
 
 ## Gotchas
