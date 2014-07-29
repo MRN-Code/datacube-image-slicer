@@ -6,7 +6,7 @@
     if (typeof module !== "undefined" && typeof require !== "undefined") {
         d3 = require('d3');
     } else if (!d3) {
-        throw new Error("MRI slicer dependencies not met");
+        throw new Error("datacube slicer dependencies not met");
     }
 
     var color = d3.scale.linear()
