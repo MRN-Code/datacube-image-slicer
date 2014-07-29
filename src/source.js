@@ -1,14 +1,12 @@
 // inspired by http://jsfiddle.net/splis/VwPL9/
 //             http://bl.ocks.org/mbostock/3074470#heatmap.json
-(function initMRISlicer (window, d3, jQuery, undefined) {
+(function datacubeSlicerLoader (d3, undefined) {
     "use strict";
-    if (!window || !d3 || !jQuery || !jQuery.effects) {
+
+    if (typeof module !== "undefined" && typeof require !== "undefined") {
+        d3 = require('d3');
+    } else if (!d3) {
         throw new Error("MRI slicer dependencies not met");
-    }
-    if (!document.createElement('canvas').getContext) {
-        throw new Error("Your browser is unsupported");
-        // IE polyfill should have been loaded to added canvas API to
-        // old browsers (excanvas.js)
     }
 
     var color = d3.scale.linear()
@@ -22,21 +20,56 @@
             z: null
         },
         gaugeWidth = 20,        // px, gauge width
-        gaugeDialRadius = 5,   // px, dial raidus
+        gaugeDialRadius = 5,    // px, dial raidus
+        cb,                     // callback, onload
         ctx,                    // canvas context
         dx, dy, dz,             // px, cube width, height, depth
         defX, defY, defZ,       // int, default view positions
         heatmap,                // Array, 3d data to render
-        idleIntvl, idleAniIntvl,   // defines time-based idle activity
+        idleAnimationPercentage,// % (approximate), 1.00 === 100%, 0.50 === 50%, etc
+        idleEnabled,            // Boolean, permit idle animation
+        idleIntvl, idleAniIntvl,// defines time-based idle activity
         minFrameRenderTime,     // ms, permit at least this time between redraw-calls during animation
+        mo_f, mo_dt, mo_at,     // mouseout function, set once by config init.  ms, delay time, ms, animation time
         height, width,          // int, canvas dimensions
         reset, resetInterval,   // Timeout, function to reset panes
         SS, xS, yS, yS2, zS, hS,// d3 scalars
+        target,                 // Selector, where to place the canvas
         tmrStart, tmrStop;      // ms, timer markers for measuring browser performance
 
 
     // Main
-    d3.json("sample_data/TT1.json", bootstrap);
+    /**
+     * Generates a new 3-pane slicer
+     * @param  {Object} config {
+     *     data: 'string' filepath to json/3d data array
+     * }
+     */
+    function datacubeSlicer (config) {
+        if (!config || !config.data) {
+            throw new Error("Attempted to build 3d slicer with insufficient config data!");
+        }
+        if (config.mouseout === undefined || config.mouseout === "slide-to-center") {
+            mo_f = 1;  // 1 > animate
+        } else if (typeof config.mouseout !== 'string') {
+            mo_f = 0; // 0 > snapback
+        } else throw new Error("Invalid mouseout requested");
+
+        mo_at = config.mouseoutAnimationDur || 1000;
+        mo_dt = config.mouseoutDelay || 500;
+
+        if (config.idleAnimation) {
+            idleEnabled = true;
+            idleAnimationPercentage = config.idleAnimationPercentage || 0.25;
+        }
+
+        target = config.target || "body";
+        if (config.cb) {
+            cb = config.cb;
+        }
+
+        d3.json(config.data, bootstrap);
+    }
 
 
     /**
@@ -87,6 +120,12 @@
             throw error;
         }
 
+        if (!document.createElement('canvas').getContext) {
+            throw new Error("Your browser is unsupported");
+            // IE polyfill should have been loaded to added canvas API to
+            // old browsers (excanvas.js)
+        }
+
         // init heatmap vals
         heatmap = hm;
         dx = heatmap.length;
@@ -123,11 +162,11 @@
             .domain([0, 255])
             .range([0, height]);
 
-        d3Canv = d3.select("#canvas_wrapper").append("canvas")
+        d3Canv = d3.select(target).append("canvas")
             .attr({
                 "width": width,
                 "height": height,
-                "class": "slicer"
+                "class": "datacube-slicer"
             });
         ctx = d3Canv.node().getContext("2d");
 
@@ -141,11 +180,8 @@
             .on('mousemove', mmv)
             .on('mouseout', mo);
 
-        jQuery("#slicer_loading").fadeOut(1000, function fadeMRIslicerIn() {
-            var jqC = jQuery("canvas");
-            jQuery("canvas").toggle("slide");
-        });
-        idleAnimation(true);
+        idleAnimation(idleEnabled);
+        if (cb) cb();
     }
 
 
@@ -224,27 +260,29 @@
      */
     function idleAnimation (enable) {
         if (!enable) {
-            clearInterval(idleIntvl);
+            if (idleIntvl) clearInterval(idleIntvl);
             idleIntvl = null;
-            clearInterval(idleAniIntvl);
+            if (idleAniIntvl) clearInterval(idleAniIntvl);
             idleAniIntvl = null;
             return;
         }
+        var smallestAniAxis = d3.min([dx, dy, dz]),
+            defAni, aniPos;
+        // Find smallest axis, learn animation's constraint
+        if (smallestAniAxis === dx) {
+            defAni = defX;
+            aniPos = 'x';
+        } else if (smallestAniAxis === dy) {
+            defAni = defY;
+            aniPos = 'y';
+        } else {
+            defAni = defZ;
+            aniPos = 'z';
+        }
+
         idleIntvl = setInterval(function scheduleIdleAnimation () {
             if (idleAniIntvl) return;
-            var smallestAniAxis = d3.min([dx, dy, dz]),
-                moveCount = 0,
-                defAni, aniPos;
-            if (smallestAniAxis === dx) {
-                defAni = defX;
-                aniPos = 'x';
-            } else if (smallestAniAxis === dy) {
-                defAni = defY;
-                aniPos = 'y';
-            } else {
-                defAni = defZ;
-                aniPos = 'z';
-            }
+            var moveCount = 0;
             idleAniIntvl = setInterval(function animateLateralScroll () {
                 if (moveCount < defAni/2) --pos[aniPos];
                 else if (moveCount < defAni*1.5) ++pos[aniPos];
@@ -257,9 +295,8 @@
                 drawImage(ctx, heatmap, 2*dy+2*gap+gap, 0, dx, height, pos[aniPos], 1);
                 drawImage(ctx, heatmap, 0, 0, dy, height, pos[aniPos], 2);
                 ++moveCount;
-
             }, minFrameRenderTime);
-        }, 10000);
+        }, Math.floor(minFrameRenderTime*defAni*2*(1/idleAnimationPercentage)));
     }
 
 
@@ -329,45 +366,65 @@
     /**
      * Handles mouseout activites for the mri canvas
      */
-    function mo() {
-        if (minFrameRenderTime === undefined) {
-            throw new Error("Cannot animate MRI panes unless a max " +
-                "refresh rate is defined");
+    function mo () {
+        if (mo_f === 1) {
+            if (minFrameRenderTime === undefined) {
+                throw new Error("Cannot animate MRI panes unless a max " +
+                    "refresh rate is defined");
+            }
+            var self = this,
+                animationDuration = mo_at, // ms
+                x = d3.mouse(self)[0],
+                y = d3.mouse(self)[1],
+                revertFrames = Math.ceil(animationDuration/minFrameRenderTime),
+                revertInc = { // distance incriments for each refresh frame to travel
+                    x: (defX - pos.x)/revertFrames,
+                    y: (defY - pos.y)/revertFrames,
+                    z: (defZ - pos.z)/revertFrames
+                };
+
+            // pauseBeforeReset delays for 500 ms before sliding the mri
+            // images back to their defaults
+            reset = setTimeout(function pauseBeforeReset () {
+                clearGauge();
+                /**
+                 * Animates the MRI panes to their default positions
+                 */
+                resetInterval = setInterval(function animateReset () {
+                    pos.x += revertInc.x;
+                    pos.y += revertInc.y;
+                    pos.z += revertInc.z;
+                    drawImage(ctx, heatmap, dy+gap, 0, dy, height, pos.x, 0);
+                    drawImage(ctx, heatmap, 2*dy+2*gap+gap, 0, dx, height, pos.y, 1);
+                    drawImage(ctx, heatmap, 0, 0, dy, height, pos.z, 2);
+                    --revertFrames;
+                    if (!revertFrames) {
+                        clearInterval(resetInterval);
+                        pos.x = Math.floor(pos.x);
+                        pos.y = Math.floor(pos.y);
+                        pos.z = Math.floor(pos.z);
+                    }
+                }, minFrameRenderTime);
+            }, mo_dt);
+        } else {
+            moSnapBack();
         }
-        var self = this,
-            animationDuration = 1000, // ms
-            x = d3.mouse(self)[0],
-            y = d3.mouse(self)[1],
-            revertFrames = Math.ceil(animationDuration/minFrameRenderTime),
-            revertInc = { // distance incriments for each refresh frame to travel
-                x: (defX - pos.x)/revertFrames,
-                y: (defY - pos.y)/revertFrames,
-                z: (defZ - pos.z)/revertFrames
-            };
-        // pauseBeforeReset delays for 500 ms before sliding the mri
-        // images back to their defaults
-        reset = setTimeout(function pauseBeforeReset () {
-            /**
-             * Animates the MRI panes to their default positions
-             */
-            clearGauge();
-            resetInterval = setInterval(function animateReset () {
-                pos.x += revertInc.x;
-                pos.y += revertInc.y;
-                pos.z += revertInc.z;
-                drawImage(ctx, heatmap, dy+gap, 0, dy, height, pos.x, 0);
-                drawImage(ctx, heatmap, 2*dy+2*gap+gap, 0, dx, height, pos.y, 1);
-                drawImage(ctx, heatmap, 0, 0, dy, height, pos.z, 2);
-                --revertFrames;
-                if (!revertFrames) {
-                    clearInterval(resetInterval);
-                    pos.x = Math.floor(pos.x);
-                    pos.y = Math.floor(pos.y);
-                    pos.z = Math.floor(pos.z);
-                    idleAnimation(true);
-                }
-            }, minFrameRenderTime);
-        }, 500);
+        idleAnimation(idleEnabled);
+    }
+
+
+
+    /**
+     * Draws the view of the default point of slice
+     * Called by the mouseout handler, mo()
+     */
+    function moSnapBack () {
+        pos.x = defX;
+        pos.y = defY;
+        pos.z = defZ;
+        drawImage(ctx, heatmap, dy+gap, 0, dy, height, pos.x, 0);
+        drawImage(ctx, heatmap, 2*dy+2*gap+gap, 0, dx, height, pos.y, 1);
+        drawImage(ctx, heatmap, 0, 0, dy, height, pos.z, 2);
     }
 
 
@@ -459,4 +516,12 @@
             ctx.stroke();
         }
     }
-})(window, d3, jQuery);
+
+    if (typeof module !== "undefined" && typeof require !== "undefined") {
+        module.exports = datacubeSlicer;
+    } else if (window.datacubeSlicer) {
+        throw new Error("datacubeSlicerdy exists on the window.  Overwriting not permitted.");
+    } else {
+        window.datacubeSlicer = datacubeSlicer;
+    }
+})(d3);
