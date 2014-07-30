@@ -1,12 +1,13 @@
 // inspired by http://jsfiddle.net/splis/VwPL9/
 //             http://bl.ocks.org/mbostock/3074470#heatmap.json
-(function datacubeSlicerLoader (d3, undefined) {
+(function datacubeSlicerLoader (undefined) {
     "use strict";
 
     if (typeof module !== "undefined" && typeof require !== "undefined") {
         d3 = require('d3');
-    } else if (!d3) {
-        throw new Error("datacube slicer dependencies not met");
+    } else {
+        if (!window.d3) throw new Error("datacube slicer dependencies not met");
+        d3 = window.d3;
     }
 
     var color = d3.scale.linear()
@@ -524,4 +525,4 @@
     } else {
         window.datacubeSlicer = datacubeSlicer;
     }
-})(d3);
+})();

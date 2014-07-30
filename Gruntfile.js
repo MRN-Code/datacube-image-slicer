@@ -7,6 +7,9 @@ module.exports = function (grunt) {
                 bundleOptions: {
                     debug: true
                 },
+                alias: {
+                    './dist/datacube.img.slicer.min.js':'datacube-image-slicer'
+                },
                 src: ['test/commonjs/module.js'],
                 dest: 'test/commonjs/bundle.js',
             }
