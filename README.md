@@ -11,12 +11,12 @@ Generates an interactive 3-paned image 'slicer' from a three dimensional data ar
 * `npm install` to install the dependencies
 * `grunt` to build the js
 * Build a config object, as described below
-* Build the pane: ```var yourSlicerPane = new datacubeSlicer(yourConfigObject);```
-* Source via `<script src="dist/datacube.img.slicer.min.js" type="text/javascript" charset="utf-8"></script>` or use the module.
+* Build the pane: ```var slicedImagePane = new datacubeSlicer(config);```
+* Test!  Sample .json data is included in the sample_data/ directory.
 
 ## Configure
 ```javascript
-var yourConfiguration = {
+var config = {
         data: "../../sample_data/TT1.json", // The ONLY required property
         target: "#canvas_wrapper",          // selector, to defaults to body
 
