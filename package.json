@@ -1,7 +1,15 @@
 {
   "name": "datacube-image-slicer",
+  "author": {
+    "name": "Christopher Dieringer",
+    "url": "cdaringe.net"
+  },
+  "contributors": [
+    {
+      "name": "Sergey Plis"
+    }
+  ],
   "description": "Interactive 3-paned/3-axis datacube image slicer",
-  "version": "0.0.1",
   "devDependencies": {
     "grunt": "~0.4.5",
     "grunt-contrib-watch": "~0.6.1",
@@ -11,5 +19,18 @@
     "grunt-browserify": "^2.1.4",
     "d3": "^3.4.11"
   },
-  "main": "src/source.js"
+  "keywords": [
+    "canvas",
+    "mri",
+    "datacube",
+    "heatmap",
+    "dom",
+    "3d"
+  ],
+  "main": "src/source.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MRN-Code/datacube-image-slicer.git"
+  },
+  "version": "0.0.1"
 }
