@@ -20,10 +20,6 @@
 			y: null,
 			z: null
 		},
-		mpos = {                 // current mouse position
-			x: null,
-			y: null,
-		},
 		gaugeWidth = 20,        // px, gauge width
 		gaugeDialRadius = 5,    // px, dial raidus
 		cb,                     // callback, onload
@@ -254,9 +250,7 @@
 				image.data[++p] = sign(c % 255) * 255;
 			}
 		}
-
 		ctx.putImageData(image, sx, sy);
-
 	}
 
 
