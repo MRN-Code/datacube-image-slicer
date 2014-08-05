@@ -6,7 +6,7 @@ Generates an interactive 3-paned image 'slicer' from a three dimensional data ar
 ![](https://raw.githubusercontent.com/MRN-Code/datacube-image-slicer/master/img/mri_animated.gif)
 
 ## Install
-* Works both via `<script>` tag or commonjs `var datacubeSlicer = require('datacube-slicer');`.
+* Works both via `<script src="dist/datacube.img.slicer.min.js">` tag or commonjs `var datacubeSlicer = require('datacube-image-slicer');`.
 * Clone this repo, `git clone https://github.com/MRN-Code/datacube-image-slicer.git` then `cd` into the cloned directory
 * `npm install` to install the dependencies
 * `grunt` to build the js
