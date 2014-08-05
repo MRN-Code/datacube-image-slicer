@@ -33,7 +33,7 @@ module.exports = function (grunt) {
         },
         uglify: {
             options: {
-                sourceMap: true,
+                sourceMap: true
             },
           dist: {
             src: 'src/source.js',
