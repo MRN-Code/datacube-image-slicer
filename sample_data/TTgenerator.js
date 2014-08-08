@@ -1,13 +1,21 @@
+var fs = require('fs');
+var path = require('path');
 var x = [],
-    cubeW = 25,
-    max = 25*3;
-for (var i = 0; i < 25; ++i) {
-    for (var j = 0; j < 25; ++j) {
-        for (var k = 0; k < 25; ++k) {
+    cubeW = 256;
+for (var i = 0; i < cubeW; ++i) {
+    for (var j = 0; j < cubeW; ++j) {
+        for (var k = 0; k < cubeW; ++k) {
             if (!x[i]) x[i] = [];
             if (!x[i][j]) x[i][j] = [];
-            x[i][j][k] = Math.floor(((i+j+k)/max)*255);
+            x[i][j][k] = Math.floor((i+j+k)/3);
         }
     }
 }
-console.log(JSON.stringify(x));
+
+fs.writeFile(path.resolve(__dirname, 'cubeData.json'), JSON.stringify(x), function(err) {
+    if(err) {
+        console.log(err);
+    } else {
+        console.log("cubeData.json saved!");
+    }
+});

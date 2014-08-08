@@ -16,7 +16,8 @@
     "grunt-contrib-concat": "~0.4.0",
     "grunt-contrib-uglify": "~0.5.0",
     "grunt-contrib-cssmin": "^0.10.0",
-    "grunt-browserify": "^2.1.4"
+    "grunt-browserify": "^2.1.4",
+    "path": "*"
   },
   "keywords": [
     "canvas",
@@ -33,6 +34,7 @@
   },
   "version": "0.0.3",
   "dependencies": {
-    "d3": "^3.4.11"
+    "d3": "^3.4.11",
+    "color-string": "^0.2.1"
   }
 }

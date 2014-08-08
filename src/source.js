@@ -1,30 +1,31 @@
 // inspired by http://jsfiddle.net/splis/VwPL9/
 //             http://bl.ocks.org/mbostock/3074470#heatmap.json
+/* jshint -W040, unused:true */
 (function datacubeSlicerLoader (undefined) {
     "use strict";
 
-    if (typeof module !== "undefined" && typeof require !== "undefined") {
-        d3 = require('d3');
-    } else {
-        if (!window.d3) throw new Error("datacube slicer dependencies not met");
-        d3 = window.d3;
-    }
-
-    var gap = 5,                // px, width between imgs
-        pos = {                 // current view position
+    var pos = {                 // current view position
             x: null,
             y: null,
             z: null
         },
-        colors, colorScale,
-        d3Canv,
-        gaugeWidth,        // px, gauge width
-        gaugeDialRadius = 5,    // px, dial raidus
+        canvasAttrs,
+        colors,     // array, d3.scale for two colors to draw with
+        colorString,
+        colorDrawRGB,          // array, [red, green, blue] of requested colors
+        clr0R, clr0G, clr0B,    // exploded colorsDrawRGB for fast reference
+        debug,
+        d3, d3Canv,
+        gap,                    // px, width between imgs
+        gaugeWidth,             // px, gauge width
+        gaugeDialRadius,    // px, dial raidus
         cb,                     // callback, onload
         ctx,                    // canvas context
         dx, dy, dz,             // px, cube width, height, depth
         defX, defY, defZ,       // int, default view positions
-        drawLock,               // bool, prevents draw events from queueing
+        drawPenalty,            // boolean, flags that datacube is not granted to respond to mousemove events
+        drawLock, drawLockPings,// bool, prevents draw events from queueing, number, draw requests while another request is still actively drawn
+        gaugeDialColor,
         heatmap,                // Array, 3d data to render
         idleAnimationPercentage,// % (approximate), 1.00 === 100%, 0.50 === 50%, etc
         idleEnabled,            // Boolean, permit idle animation
@@ -37,6 +38,15 @@
         target,                 // Selector, where to place the canvas
         tmrStart, tmrStop;      // ms, timer markers for measuring browser performance
 
+    if (typeof module !== "undefined" && typeof require !== "undefined") {
+        d3 = require('d3');
+        colorString = require("color-string");
+    } else {
+        if (!window.d3 || !window.colorString) throw new Error("datacube slicer dependencies not met");
+        d3 = window.d3;
+        colorString = window.colorString;
+    }
+
     /**
      * Generates a new 3-pane slicer
      * @param  {Object} config {
@@ -44,84 +54,90 @@
      * }
      */
     function datacubeSlicer (config) {
+        var configValue;
         if (!config || !config.data) {
             throw new Error("Attempted to build 3d slicer with insufficient config data!");
         }
-        if (config.mouseout === undefined || config.mouseout === "slide-to-center") {
-            mo_f = 1;  // 1 => animate
-        } else if (typeof config.mouseout !== 'string') {
-            mo_f = 0; // 0 => snapback
-        } else throw new Error("Invalid mouseout requested");
 
-        mo_at = config.mouseoutAnimationDur || 1000;
-        mo_dt = config.mouseoutDelay || 500;
+        // Default initialization
+        colors = ["black", "white"];
+        drawLock = false;
+        drawLockPings = 0;
+        drawPenalty = false;
+        gap = 5;
+        gaugeWidth = 0;
+        gaugeDialColor = '#000000';
+        gaugeDialRadius = 5;
+        idleAnimationPercentage = 0.25;
+        mo_at = 1000;
+        mo_dt = 500;
+        mo_f = 1;  // 1 => animate mouseout
+        target = "body";
 
-        if (config.idleAnimation) {
-            idleEnabled = true;
-            idleAnimationPercentage = config.idleAnimationPercentage || 0.25;
-        }
-
-        if (config.colors) {
-            if (config.colors !== 'Array' &&
-                config.colors.length !== 2 &&
-                typeof config.colors[0] !== 'string' &&
-                typeof config.colors[1] !== 'string') {
-                throw new Error("Invalid colors specified for datacube");
-            }
-            colors = config.colors;
-        } else {
-            colors = ["black", "white"];
-        }
-
-        colorScale = d3.scale.linear()
-                    .domain([0, 255])
-                    .range(colors);
-        gaugeWidth = config.gaugeWidth ? config.gaugeWidth : 20;
-        if (!config.gauge) {
-            gaugeWidth = 0;
-        }
-
-        target = config.target || "body";
-        if (config.cb) {
-            cb = config.cb;
-        }
-
-        d3.json(config.data, bootstrap);
-    }
-
-
-    /**
-     * TODO: UNUSED - PURGE?
-     * Average values of surrounding values in cube array
-     * @param  {Number} cubeRadius - number of sub elements on
-     * either side of cube array center to include in average
-     * @return {Number}
-     */
-    function avgCubeVal (arr3d, cubeRadius, x, y, z) {
-        for (var n in arguments) {
-            if (arguments.hasOwnProperty(i)) {
-                arguments[n] = Math.floor(arguments[n]);
-            }
-        }
-        var noAdds = 0,
-            total = 0,
-            counts = 0;
-        x -= cubeRadius;
-        y -= cubeRadius;
-        z -= cubeRadius;
-        for (var i = 0; i <= cubeRadius*2; i++) {
-            for (var j = 0; j<= cubeRadius*2; ++j) {
-                for (var k = 0; k<= cubeRadius*2; ++k) {
-                    if (arr3d[x+i] && arr3d[x+i][y+j] && arr3d[x+i][y+j][z+k]) {
-                        total += arr3d[x+i][y+j][z+k];
-                        counts++;
-                    } else {
-                        ++noAdds;
-                    }
+        // User initialization
+        for (var prop in config) {
+            if (config.hasOwnProperty(prop)) {
+                configValue = config[prop];
+                switch(prop) {
+                    case 'canvasAttrs':
+                        canvasAttrs = configValue;
+                        break;
+                    case 'cb':
+                        cb = configValue;
+                        break;
+                    case 'data':
+                        break;
+                    case 'debug':
+                        debug = configValue;
+                        break;
+                    case 'drawColor':
+                        colors[0] = configValue;
+                        break;
+                    case 'gap':
+                        gap = configValue;
+                        break;
+                    case 'gauge':
+                        gaugeWidth = config.gaugeWidth || 20;
+                        break;
+                    case 'gaugeWidth':
+                        gaugeWidth = configValue;
+                        break;
+                    case 'gaugeDialColor':
+                        gaugeDialColor = configValue;
+                        break;
+                    case 'idleAnimation':
+                        idleEnabled = true;
+                        break;
+                    case 'idleAnimationPercentage':
+                        idleAnimationPercentage = configValue;
+                        break;
+                    case 'mouseout':
+                        if (configValue === "slide-to-center") break;
+                        mo_f = 0; // 0 => snapback mouseout
+                        break;
+                    case 'mouseoutAnimationDur':
+                        mo_at = configValue;
+                        break;
+                    case 'mouseoutDelay':
+                        mo_dt = configValue;
+                        break;
+                    case 'target':
+                        target = configValue;
+                        break;
+                    default:
+                        throw new Error("Invalid configuration parameter passed (" +
+                            prop + ")");
                 }
             }
         }
-        return total/(Math.pow((2*cubeRadius+1),3) - noAdds);
+
+        // Post-user init processing
+        colorDrawRGB = colorString.getRgb(colors[0]);
+        clr0R = colorDrawRGB[0];
+        clr0G = colorDrawRGB[1];
+        clr0B = colorDrawRGB[2];
+
+        d3.json(config.data, bootstrap);
     }
 
 
@@ -146,9 +162,9 @@
 
         // init heatmap vals
         heatmap = hm;
-        dx = heatmap.length;
-        dy = heatmap[0].length;
-        dz = heatmap[0][0].length;
+        dx = heatmap.length - 1;
+        dy = heatmap[0].length - 1;
+        dz = heatmap[0][0].length - 1;
         defX = Math.floor(dx/2);
         defY = Math.floor(dy/2);
         defZ = Math.floor(dz/2);
@@ -159,7 +175,6 @@
         };
         height = d3.max([dx, dz]);
         width = dy + gap + dy + gap + dx + gap + gaugeWidth + gaugeDialRadius;
-        console.log(width);
 
         // init scales
         SS = d3.scale.linear()
@@ -180,6 +195,29 @@
         hS = d3.scale.linear()
             .domain([0, 255])
             .range([0, height]);
+        // if (debug) {
+        //     console.log('x, y, z: ', dx, dy, dz);
+        //     console.dir({zones:
+        //         [
+        //             {Z_START: SS.invert(0)},
+        //             {Z_END: SS.invert(1)},
+        //             {GAP_1_START: SS.invert(1)},
+        //             {GAP_1_STOP: SS.invert(2)},
+        //             {Y_START: SS.invert(2)},
+        //             {Y_STOP: SS.invert(3)},
+        //             {GAP_2_START: SS.invert(3)},
+        //             {GAP_2_STOP: SS.invert(4)},
+        //             {X_START: SS.invert(4)},
+        //             {X_STOP: SS.invert(5)},
+        //             {GAP_3_START: SS.invert(5)},
+        //             {GAP_3_STOP: SS.invert(6)},
+        //             {GAUGE_START: SS.invert(6)},
+        //             {GAUGE_STOP: SS.invert(7)},
+        //             {GAUGE_DIAL_START: SS.invert(7)},
+        //             {GAUGE_DIAL_STOP: SS.invert(8)}
+        //         ]
+        //     });
+        // }
 
         d3Canv = d3.select(target).append("canvas")
             .attr({
@@ -187,6 +225,9 @@
                 "height": height,
                 "class": "datacube-slicer"
             });
+        if (canvasAttrs) {
+            d3Canv.attr(canvasAttrs);
+        }
         ctx = d3Canv.node().getContext("2d");
 
         d3Canv.call(timerStart)
@@ -220,15 +261,29 @@
 
 
     /**
+     * Contrains a value between two bounds
+     * @param  {Number} val
+     * @param  {Number} lowerLimit
+     * @param  {Number} upperLimit
+     * @return {Number}
+     */
+    function constrain (val, lowerLimit, upperLimit) {
+        if (val >= lowerLimit && val <= upperLimit) return val;
+        return Math.max(Math.min(val, upperLimit), lowerLimit);
+    }
+
+
+
+    /**
      * Paints a gradient gauge to right right of the slice panes
      * @param  {Canvas} canvas
      * @param  {Number} sx - shift/x
      * @param  {Number} sy - shift/y
      */
-    function drawGaugeBar (canvas, sx, sy) {
+    function drawGaugeBar (canvas, sx) { //,sy
         var grd=ctx.createLinearGradient(sx, 0, sx, height);
         grd.addColorStop(0,colors[0]);
-        grd.addColorStop(1,colors[1]);
+        grd.addColorStop(1,"rgba(" + clr0R + "," + clr0G + "," + clr0B + ",0)");
         ctx.fillStyle=grd;
         ctx.fillRect(sx, 0, gaugeWidth, height);
     }
@@ -247,7 +302,7 @@
      * @param  {Number} type - chart index.  Key == {x:0, y:1, z:2}
      */
     function drawImage(canvas, hm, sx, sy, w, h, cc, type) {
-        var c = 0; // variable to store color value
+        var cVal; // variables to store color value
         cc = Math.floor(cc); // force integer values
         // array of slicing functions 3D to 2D
         var fnx = [function(x,y) {return hm[cc][dy-1-y][x];},
@@ -264,11 +319,11 @@
 
         for (var x = 0, p = -1; x < maxX; ++x) {
             for (var y = 0; y < maxY; ++y) {
-                c = sub(x,y);
-                image.data[++p] = c;
-                image.data[++p] = c;
-                image.data[++p] = c;
-                image.data[++p] = sign(c % 255) * 255;
+                cVal = sub(x,y) || 0;
+                image.data[++p] = clr0R;
+                image.data[++p] = clr0G ;
+                image.data[++p] = clr0B;
+                image.data[++p] = 255-cVal; //sign(cVal % 255) * 255;
             }
         }
         ctx.putImageData(image, sx, sy);
@@ -326,40 +381,32 @@
 
 
     /**
-     * Determines if a cursor is within the 3
-     * drawn mri panes. Assumed called within context
-     * of mouse event on canvas, thus y is always in
-     * bounds
-     * @param  {Number} x
-     * @param  {Number} y
-     * @return {Boolean} true, if inbounds
-     */
-    function inBounds(x, y) {
-        var SSval = SS(x);
-        return (SSval > 0 && SSval < 6);
-    }
-
-
-    /**
      * Respond to mouse movement over the canvas
      */
     function mmv() {
-        if (drawLock) return;
+        if (drawPenalty) {
+            return;
+        }
+        if (drawLock) {
+            ++drawLockPings;
+            return;
+        }
         drawLock = true;
         var self = this,
-            x = d3.mouse(self)[0],
-            y = d3.mouse(self)[1];
+            lockDurPenalty = 0,
+            x = constrain(d3.mouse(self)[0], 0, width),
+            y = constrain(d3.mouse(self)[1], 0, height);
 
         idleAnimation(false);
-        if (reset) { // !inBounds(x,y)
-            // Reset to int values as animations permit non-int positions
-            pos.x = Math.floor(pos.x);
-            pos.y = Math.floor(pos.y);
-            pos.z = Math.floor(pos.z);
-            clearInterval(resetInterval);
-            clearTimeout(reset);
-            reset = null;
-        }
+
+        // Reset to int values as animations permit non-int positions
+        // Floor per animations and browser zoom permitting decimal values
+        pos.x = Math.floor(pos.x);
+        pos.y = Math.floor(pos.y);
+        pos.z = Math.floor(pos.z);
+        clearInterval(resetInterval);
+        clearTimeout(reset);
+        reset = null;
 
         switch (Math.ceil(SS(x))) {
         case 1: // Z
@@ -383,7 +430,18 @@
         default:
         }
         if (gaugeWidth) updateGauge();
-        drawLock = false;
+        /* If many move events fired before this function could finish drawing, make note.
+         * Penalize subsequent drawing by permitting the thread to focus elsewhere as clearly
+         * we cannot draw fast enough. */
+        if (drawLockPings) {
+            drawPenalty = true;
+            lockDurPenalty = constrain(drawLockPings * 5, 1, 1000);
+            drawLockPings = 0;
+        }
+        setTimeout(function clearDrawLock () {
+            drawLock = false;
+            drawPenalty = false;
+        }, lockDurPenalty || 0);
     }
 
 
@@ -392,15 +450,13 @@
      * Handles mouseout activites for the mri canvas
      */
     function mo () {
+        clearGauge();
         if (mo_f === 1) {
             if (minFrameRenderTime === undefined) {
                 throw new Error("Cannot animate MRI panes unless a max " +
                                 "refresh rate is defined");
             }
-            var self = this,
-                animationDuration = mo_at, // ms
-                x = d3.mouse(self)[0],
-                y = d3.mouse(self)[1],
+            var animationDuration = mo_at, // ms
                 revertFrames = Math.ceil(animationDuration/minFrameRenderTime),
                 revertInc = { // distance incriments for each refresh frame to travel
                     x: (defX - pos.x)/revertFrames,
@@ -411,7 +467,6 @@
             // pauseBeforeReset delays for 500 ms before sliding the mri
             // images back to their defaults
             reset = setTimeout(function pauseBeforeReset () {
-                clearGauge();
                 /**
                  * Animates the MRI panes to their default positions
                  */
@@ -471,20 +526,6 @@
 
 
     /**
-     * Determines if a numeric value is positive, negative, or zero
-     * @param  {*} x
-     * @return {Number|NaN} 1 for +, -1 for -, else NaN
-     */
-    function sign(x){
-        if( +x === x ) { // check if a number was given
-            return (x === 0) ? x : (x > 0) ? 1 : -1;
-        }
-        return NaN;
-    }
-
-
-
-    /**
      * Gets current UTC timestamp in ms and places into this tmrStart
      * @return {Number} utc time, ms
      */
@@ -514,7 +555,6 @@
             radius         = gaugeDialRadius - 2,
             startAngle     = Math.PI/2,
             endAngle       = 3*Math.PI/2,
-            anticlockwise  = true,
             guageValue,
             y;
         if (heatmap[pos.x] !== undefined &&
@@ -531,15 +571,15 @@
             throw new Error("Invalid guageValue detected: " + guageValue);
         }
         clearGauge(x);
-        if (guageValue > 0 && guageValue < 255) {
-            ctx.beginPath();
-            ctx.arc(x + 1, y, radius, startAngle, endAngle, true);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(x + 1, y);
-            ctx.lineTo(x, y);
-            ctx.stroke();
-        }
+        ctx.strokeStyle = gaugeDialColor;
+        console.log(gaugeDialColor);
+        ctx.beginPath();
+        ctx.arc(x + 1, y, radius, startAngle, endAngle, true);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x + 1, y);
+        ctx.lineTo(x, y);
+        ctx.stroke();
     }
 
     if (typeof module !== "undefined" && typeof require !== "undefined") {

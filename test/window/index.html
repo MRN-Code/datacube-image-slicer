@@ -10,7 +10,8 @@
     <!--[if IE]>
         <script type="text/javascript" src="lib/excanvas/excanvas.compiled.js"></script>
     <![endif]-->
-    <script src="../../dist/datacube.img.slicer.min.js" type="text/javascript" charset="utf-8"></script>
+    <!-- <script src="../../dist/datacube.img.slicer.min.js" type="text/javascript" charset="utf-8"></script> -->
+    <script src="../../src/source.js" type="text/javascript" charset="utf-8"></script>
     <script type="text/javascript">
         window.onload = function goGoGadgetDatacubeSlicer () {
             var allReady = function () {
@@ -27,6 +28,10 @@
                 target: "#canvas_wrapper",          // defaults to body
 
                 cb: allReady,                   // callback (passes no data)
+
+                colors: ["red", "green"],       // array, 2 colors to form gradient.  default: black, white
+                gauge: false,
+                gaugeWidth: 50,
 
                 idleAnimation: true,            // simulates a mouse hover to catch the user's eye
                 idleAnimationPercentage: 0.3,   // % (approximate), 1.00 === 100%, 0.50 === 50%, etc.  Note, a safety time buffer is added to each async frame render, but no failsafes are put on this.  90%-100% is not recommended until further proofing is builtin/tested.

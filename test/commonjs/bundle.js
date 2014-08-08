@@ -1,7 +1,1003 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-!function(a){"use strict";function b(b){if(!b||!b.data)throw new Error("Attempted to build 3d slicer with insufficient config data!");if(b.mouseout===a||"slide-to-center"===b.mouseout)E=1;else{if("string"==typeof b.mouseout)throw new Error("Invalid mouseout requested");E=0}G=b.mouseoutAnimationDur||1e3,F=b.mouseoutDelay||500,b.idleAnimation&&(A=!0,z=b.idleAnimationPercentage||.25),R=b.target||"body",b.cb&&(q=b.cb),d3.json(b.data,c)}function c(a,b){if(a)throw console.error("Unable to fetch heatmap data"),a;if(!document.createElement("canvas").getContext)throw new Error("Your browser is unsupported");y=b,s=y.length,t=y[0].length,u=y[0][0].length,v=Math.floor(s/2),w=Math.floor(t/2),x=Math.floor(u/2),V={x:v,y:w,z:x},H=d3.max([s,u]),I=t+U+t+U+s+U+X+Y,L=d3.scale.linear().range([0,1,2,3,4,5,6,7,8]).domain([0,t,t+U,2*t+U,2*t+2*U,2*t+2*U+s,2*t+3*U+s,2*t+3*U+s+X,I]),M=d3.scale.linear().domain([0,s]).range([0,s]),N=d3.scale.linear().domain([0,t]).range([t,0]),O=d3.scale.linear().domain([0,t]).range([0,t]),P=d3.scale.linear().domain([0,u]).range([0,u]),Q=d3.scale.linear().domain([0,255]).range([0,H]),p=d3.select(R).append("canvas").attr({width:I,height:H,"class":"datacube-slicer"}),r=p.node().getContext("2d"),p.call(m).call(f,y,0,0,t,H,x,2).call(f,y,t+U,0,t,H,v,0).call(f,y,2*t+2*U,0,s,H,w,1).call(e,2*t+3*U+s,0).call(n).call(k).on("mousemove",h).on("mouseout",i),g(A),q&&q()}function d(a){a||(a=Math.floor(L.invert(7))),r.clearRect(a,0,Y,H)}function e(a,b){var c=r.createLinearGradient(b,0,b,H);c.addColorStop(0,"black"),c.addColorStop(1,"white"),r.fillStyle=c,r.fillRect(b,0,X,H)}function f(a,b,c,d,e,f,g,h){var i=Date.now(),j=0;g=Math.floor(g);for(var k=[function(a,c){return b[g][t-1-c][a]},function(a,c){return b[c][g][a]},function(a,c){return b[a][t-1-c][g]}],m=[[u,t],[u,s],[u,t]],n=k[h],o=m[h][0],p=m[h][1],q=r.createImageData(e,f),v=0,w=-1;o>v;++v)for(var x=0;p>x;++x)j=n(v,x),q.data[++w]=j,q.data[++w]=j,q.data[++w]=j,q.data[++w]=255*l(j%255);console.log(Date.now()-i),r.putImageData(q,c,d)}function g(a){if(!a)return B&&clearInterval(B),B=null,C&&clearInterval(C),void(C=null);var b,c,d=d3.min([s,t,u]);d===s?(b=v,c="x"):d===t?(b=w,c="y"):(b=x,c="z"),B=setInterval(function(){if(!C){var a=0;C=setInterval(function(){b/2>a?--V[c]:1.5*b>a?++V[c]:2*b>a?--V[c]:(clearInterval(C),C=null),f(r,y,t+U,0,t,H,V[c],0),f(r,y,2*t+2*U+U,0,s,H,V[c],1),f(r,y,0,0,t,H,V[c],2),++a},D)}},Math.floor(D*b*2*(1/z)))}function h(){if(1==W)return 0;var a=this,b=d3.mouse(a)[0],c=d3.mouse(a)[1];switch(g(!1),J&&(V.x=Math.floor(V.x),V.y=Math.floor(V.y),V.z=Math.floor(V.z),clearInterval(K),clearTimeout(J),J=null),Math.ceil(L(b))){case 1:V.x=s-Math.floor(M.invert(c)),V.y=Math.floor(N.invert(b)),f(r,y,t+U,0,t,H,V.x,0),f(r,y,2*t+2*U+U,0,s,H,V.y,1);break;case 3:V.z=Math.floor(P.invert(c)),V.y=t-Math.floor(O.invert(b-t-U)),f(r,y,0,0,t,H,V.z,2),f(r,y,2*t+2*U+U,0,s,H,V.y,1);break;case 5:V.z=Math.floor(P.invert(c)),V.x=Math.floor(M.invert(b-2*t-2*U)),f(r,y,0,0,t,H,V.z,2),f(r,y,t+U,0,t,H,V.x,0)}if(Math.floor(V.x)!=V.x)throw new Error("hey you should be an int");o()}function i(){if(1===E){if(D===a)throw new Error("Cannot animate MRI panes unless a max refresh rate is defined");var b=this,c=G,e=(d3.mouse(b)[0],d3.mouse(b)[1],Math.ceil(c/D)),h={x:(v-V.x)/e,y:(w-V.y)/e,z:(x-V.z)/e};J=setTimeout(function(){d(),K=setInterval(function(){V.x+=h.x,V.y+=h.y,V.z+=h.z,f(r,y,t+U,0,t,H,V.x,0),f(r,y,2*t+2*U+U,0,s,H,V.y,1),f(r,y,0,0,t,H,V.z,2),--e,e||(clearInterval(K),V.x=Math.floor(V.x),V.y=Math.floor(V.y),V.z=Math.floor(V.z))},D)},F)}else j();g(A)}function j(){V.x=v,V.y=w,V.z=x,f(r,y,t+U,0,t,H,V.x,0),f(r,y,2*t+2*U+U,0,s,H,V.y,1),f(r,y,0,0,t,H,V.z,2)}function k(){if(!S||!T)throw new Error("Timer flags must be set to compute max animation speed");D=Math.ceil(1.5*(T-S)),D>33&&(D=33),T=S=0}function l(a){return+a===a?0===a?a:a>0?1:-1:0/0}function m(){return S=(new Date).getTime()}function n(){return T=(new Date).getTime()}function o(){var b,c,e=Math.floor(L.invert(7)),f=Y-2,g=Math.PI/2,h=3*Math.PI/2;if(y[V.x]!==a&&y[V.x][V.y]!==a&&y[V.x][V.y][V.z]!==a)b=y[V.x][V.y][V.z],c=Math.floor(Q(b));else{if(y[V.x]===a)throw new Error("Heatmap has no X coord of "+V.x);if(y[V.x][V.y]===a)throw new Error("Heatmap has no Y coord of "+V.y);if(y[V.x][V.y][V.z]===a)throw new Error("Heatmap has no Z coord of "+V.z)}if(0>b||b>255)throw new Error("Invalid guageValue detected: "+b);d(e),b>0&&255>b&&(r.beginPath(),r.arc(e+1,c,f,g,h,!0),r.stroke(),r.beginPath(),r.moveTo(e+1,c),r.lineTo(e,c),r.stroke())}if("undefined"!=typeof module&&"undefined"!=typeof require)d3=require("d3");else{if(!window.d3)throw new Error("datacube slicer dependencies not met");d3=window.d3}var p,q,r,s,t,u,v,w,x,y,z,A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U=(d3.scale.linear().domain([0,255]).range(["black","white"]),5),V={x:null,y:null,z:null},W=0,X=20,Y=5;if("undefined"!=typeof module&&"undefined"!=typeof require)module.exports=b;else{if(window.datacubeSlicer)throw new Error("datacubeSlicerdy exists on the window.  Overwriting not permitted.");window.datacubeSlicer=b}}();
-//# sourceMappingURL=datacube.img.slicer.min.js.map
-},{"d3":2}],2:[function(require,module,exports){
+require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+/* MIT license */
+var convert = require("color-convert");
+
+module.exports = {
+   getRgba: getRgba,
+   getHsla: getHsla,
+   getRgb: getRgb,
+   getHsl: getHsl,
+   getHwb: getHwb,
+   getAlpha: getAlpha,
+
+   hexString: hexString,
+   rgbString: rgbString,
+   rgbaString: rgbaString,
+   percentString: percentString,
+   percentaString: percentaString,
+   hslString: hslString,
+   hslaString: hslaString,
+   hwbString: hwbString,
+   keyword: keyword
+}
+
+function getRgba(string) {
+   if (!string) {
+      return;
+   }
+   var abbr =  /^#([a-fA-F0-9]{3})$/,
+       hex =  /^#([a-fA-F0-9]{6})$/,
+       rgba = /^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([\d\.]+)\s*)?\)$/,
+       per = /^rgba?\(\s*([\d\.]+)\%\s*,\s*([\d\.]+)\%\s*,\s*([\d\.]+)\%\s*(?:,\s*([\d\.]+)\s*)?\)$/,
+       keyword = /(\D+)/;
+
+   var rgb = [0, 0, 0],
+       a = 1,
+       match = string.match(abbr);
+   if (match) {
+      match = match[1];
+      for (var i = 0; i < rgb.length; i++) {
+         rgb[i] = parseInt(match[i] + match[i], 16);
+      }
+   }
+   else if (match = string.match(hex)) {
+      match = match[1];
+      for (var i = 0; i < rgb.length; i++) {
+         rgb[i] = parseInt(match.slice(i * 2, i * 2 + 2), 16);
+      }
+   }
+   else if (match = string.match(rgba)) {
+      for (var i = 0; i < rgb.length; i++) {
+         rgb[i] = parseInt(match[i + 1]);
+      }
+      a = parseFloat(match[4]);
+   }
+   else if (match = string.match(per)) {
+      for (var i = 0; i < rgb.length; i++) {
+         rgb[i] = Math.round(parseFloat(match[i + 1]) * 2.55);
+      }
+      a = parseFloat(match[4]);
+   }
+   else if (match = string.match(keyword)) {
+      if (match[1] == "transparent") {
+         return [0, 0, 0, 0];
+      }
+      rgb = convert.keyword2rgb(match[1]);
+      if (!rgb) {
+         return;
+      }
+   }
+
+   for (var i = 0; i < rgb.length; i++) {
+      rgb[i] = scale(rgb[i], 0, 255);
+   }
+   if (!a && a != 0) {
+      a = 1;
+   }
+   else {
+      a = scale(a, 0, 1);
+   }
+   rgb.push(a);
+   return rgb;
+}
+
+function getHsla(string) {
+   if (!string) {
+      return;
+   }
+   var hsl = /^hsla?\(\s*(\d+)\s*,\s*([\d\.]+)%\s*,\s*([\d\.]+)%\s*(?:,\s*([\d\.]+)\s*)?\)/;
+   var match = string.match(hsl);
+   if (match) {
+      var h = scale(parseInt(match[1]), 0, 360),
+          s = scale(parseFloat(match[2]), 0, 100),
+          l = scale(parseFloat(match[3]), 0, 100),
+          a = scale(parseFloat(match[4]) || 1, 0, 1);
+      return [h, s, l, a];
+   }
+}
+
+function getHwb(string) {
+   if (!string) {
+      return;
+   }
+   var hwb = /^hwb\(\s*(\d+)\s*,\s*([\d\.]+)%\s*,\s*([\d\.]+)%\s*(?:,\s*([\d\.]+)\s*)?\)/;
+   var match = string.match(hwb);
+   if (match) {
+      var h = scale(parseInt(match[1]), 0, 360),
+          w = scale(parseFloat(match[2]), 0, 100),
+          b = scale(parseFloat(match[3]), 0, 100),
+          a = scale(parseFloat(match[4]) || 1, 0, 1);
+      return [h, w, b, a];
+   }
+}
+
+function getRgb(string) {
+   var rgba = getRgba(string);
+   return rgba && rgba.slice(0, 3);
+}
+
+function getHsl(string) {
+  var hsla = getHsla(string);
+  return hsla && hsla.slice(0, 3);
+}
+
+function getAlpha(string) {
+   var vals = getRgba(string);
+   if (vals) {
+      return vals[3];
+   }
+   else if (vals = getHsla(string)) {
+      return vals[3];
+   }
+   else if (vals = getHwb(string)) {
+      return vals[3];
+   }
+}
+
+// generators
+function hexString(rgb) {
+   return "#" + hexDouble(rgb[0]) + hexDouble(rgb[1])
+              + hexDouble(rgb[2]);
+}
+
+function rgbString(rgba, alpha) {
+   if (alpha < 1 || (rgba[3] && rgba[3] < 1)) {
+      return rgbaString(rgba, alpha);
+   }
+   return "rgb(" + rgba[0] + ", " + rgba[1] + ", " + rgba[2] + ")";
+}
+
+function rgbaString(rgba, alpha) {
+   if (alpha === undefined) {
+      alpha = (rgba[3] !== undefined ? rgba[3] : 1);
+   }
+   return "rgba(" + rgba[0] + ", " + rgba[1] + ", " + rgba[2]
+           + ", " + alpha + ")";
+}
+
+function percentString(rgba, alpha) {
+   if (alpha < 1 || (rgba[3] && rgba[3] < 1)) {
+      return percentaString(rgba, alpha);
+   }
+   var r = Math.round(rgba[0]/255 * 100),
+       g = Math.round(rgba[1]/255 * 100),
+       b = Math.round(rgba[2]/255 * 100);
+
+   return "rgb(" + r + "%, " + g + "%, " + b + "%)";
+}
+
+function percentaString(rgba, alpha) {
+   var r = Math.round(rgba[0]/255 * 100),
+       g = Math.round(rgba[1]/255 * 100),
+       b = Math.round(rgba[2]/255 * 100);
+   return "rgba(" + r + "%, " + g + "%, " + b + "%, " + (alpha || rgba[3] || 1) + ")";
+}
+
+function hslString(hsla, alpha) {
+   if (alpha < 1 || (hsla[3] && hsla[3] < 1)) {
+      return hslaString(hsla, alpha);
+   }
+   return "hsl(" + hsla[0] + ", " + hsla[1] + "%, " + hsla[2] + "%)";
+}
+
+function hslaString(hsla, alpha) {
+   if (alpha === undefined) {
+      alpha = (hsla[3] !== undefined ? hsla[3] : 1);
+   }
+   return "hsla(" + hsla[0] + ", " + hsla[1] + "%, " + hsla[2] + "%, "
+           + alpha + ")";
+}
+
+// hwb is a bit different than rgb(a) & hsl(a) since there is no alpha specific syntax
+// (hwb have alpha optional & 1 is default value)
+function hwbString(hwb, alpha) {
+   if (alpha === undefined) {
+      alpha = (hwb[3] !== undefined ? hwb[3] : 1);
+   }
+   return "hwb(" + hwb[0] + ", " + hwb[1] + "%, " + hwb[2] + "%"
+           + (alpha !== undefined && alpha !== 1 ? ", " + alpha : "") + ")";
+}
+
+function keyword(rgb) {
+   return convert.rgb2keyword(rgb.slice(0, 3));
+}
+
+// helpers
+function scale(num, min, max) {
+   return Math.min(Math.max(min, num), max);
+}
+
+function hexDouble(num) {
+  var str = num.toString(16).toUpperCase();
+  return (str.length < 2) ? "0" + str : str;
+}
+
+},{"color-convert":3}],2:[function(require,module,exports){
+/* MIT license */
+
+module.exports = {
+  rgb2hsl: rgb2hsl,
+  rgb2hsv: rgb2hsv,
+  rgb2hwb: rgb2hwb,
+  rgb2cmyk: rgb2cmyk,
+  rgb2keyword: rgb2keyword,
+  rgb2xyz: rgb2xyz,
+  rgb2lab: rgb2lab,
+  rgb2lch: rgb2lch,
+
+  hsl2rgb: hsl2rgb,
+  hsl2hsv: hsl2hsv,
+  hsl2hwb: hsl2hwb,
+  hsl2cmyk: hsl2cmyk,
+  hsl2keyword: hsl2keyword,
+
+  hsv2rgb: hsv2rgb,
+  hsv2hsl: hsv2hsl,
+  hsv2hwb: hsv2hwb,
+  hsv2cmyk: hsv2cmyk,
+  hsv2keyword: hsv2keyword,
+
+  hwb2rgb: hwb2rgb,
+  hwb2hsl: hwb2hsl,
+  hwb2hsv: hwb2hsv,
+  hwb2cmyk: hwb2cmyk,
+  hwb2keyword: hwb2keyword,
+
+  cmyk2rgb: cmyk2rgb,
+  cmyk2hsl: cmyk2hsl,
+  cmyk2hsv: cmyk2hsv,
+  cmyk2hwb: cmyk2hwb,
+  cmyk2keyword: cmyk2keyword,
+
+  keyword2rgb: keyword2rgb,
+  keyword2hsl: keyword2hsl,
+  keyword2hsv: keyword2hsv,
+  keyword2hwb: keyword2hwb,
+  keyword2cmyk: keyword2cmyk,
+  keyword2lab: keyword2lab,
+  keyword2xyz: keyword2xyz,
+
+  xyz2rgb: xyz2rgb,
+  xyz2lab: xyz2lab,
+  xyz2lch: xyz2lch,
+
+  lab2xyz: lab2xyz,
+  lab2rgb: lab2rgb,
+  lab2lch: lab2lch,
+
+  lch2lab: lch2lab,
+  lch2xyz: lch2xyz,
+  lch2rgb: lch2rgb
+}
+
+
+function rgb2hsl(rgb) {
+  var r = rgb[0]/255,
+      g = rgb[1]/255,
+      b = rgb[2]/255,
+      min = Math.min(r, g, b),
+      max = Math.max(r, g, b),
+      delta = max - min,
+      h, s, l;
+
+  if (max == min)
+    h = 0;
+  else if (r == max)
+    h = (g - b) / delta;
+  else if (g == max)
+    h = 2 + (b - r) / delta;
+  else if (b == max)
+    h = 4 + (r - g)/ delta;
+
+  h = Math.min(h * 60, 360);
+
+  if (h < 0)
+    h += 360;
+
+  l = (min + max) / 2;
+
+  if (max == min)
+    s = 0;
+  else if (l <= 0.5)
+    s = delta / (max + min);
+  else
+    s = delta / (2 - max - min);
+
+  return [h, s * 100, l * 100];
+}
+
+function rgb2hsv(rgb) {
+  var r = rgb[0],
+      g = rgb[1],
+      b = rgb[2],
+      min = Math.min(r, g, b),
+      max = Math.max(r, g, b),
+      delta = max - min,
+      h, s, v;
+
+  if (max == 0)
+    s = 0;
+  else
+    s = (delta/max * 1000)/10;
+
+  if (max == min)
+    h = 0;
+  else if (r == max)
+    h = (g - b) / delta;
+  else if (g == max)
+    h = 2 + (b - r) / delta;
+  else if (b == max)
+    h = 4 + (r - g) / delta;
+
+  h = Math.min(h * 60, 360);
+
+  if (h < 0)
+    h += 360;
+
+  v = ((max / 255) * 1000) / 10;
+
+  return [h, s, v];
+}
+
+function rgb2hwb(rgb) {
+  var r = rgb[0],
+      g = rgb[1],
+      b = rgb[2],
+      h = rgb2hsl(rgb)[0]
+      w = 1/255 * Math.min(r, Math.min(g, b))
+      b = 1 - 1/255 * Math.max(r, Math.max(g, b));
+
+  return [h, w * 100, b * 100];
+}
+
+function rgb2cmyk(rgb) {
+  var r = rgb[0] / 255,
+      g = rgb[1] / 255,
+      b = rgb[2] / 255,
+      c, m, y, k;
+
+  k = Math.min(1 - r, 1 - g, 1 - b);
+  c = (1 - r - k) / (1 - k);
+  m = (1 - g - k) / (1 - k);
+  y = (1 - b - k) / (1 - k);
+  return [c * 100, m * 100, y * 100, k * 100];
+}
+
+function rgb2keyword(rgb) {
+  return reverseKeywords[JSON.stringify(rgb)];
+}
+
+function rgb2xyz(rgb) {
+  var r = rgb[0] / 255,
+      g = rgb[1] / 255,
+      b = rgb[2] / 255;
+
+  // assume sRGB
+  r = r > 0.04045 ? Math.pow(((r + 0.055) / 1.055), 2.4) : (r / 12.92);
+  g = g > 0.04045 ? Math.pow(((g + 0.055) / 1.055), 2.4) : (g / 12.92);
+  b = b > 0.04045 ? Math.pow(((b + 0.055) / 1.055), 2.4) : (b / 12.92);
+
+  var x = (r * 0.4124) + (g * 0.3576) + (b * 0.1805);
+  var y = (r * 0.2126) + (g * 0.7152) + (b * 0.0722);
+  var z = (r * 0.0193) + (g * 0.1192) + (b * 0.9505);
+
+  return [x * 100, y *100, z * 100];
+}
+
+function rgb2lab(rgb) {
+  var xyz = rgb2xyz(rgb),
+        x = xyz[0],
+        y = xyz[1],
+        z = xyz[2],
+        l, a, b;
+
+  x /= 95.047;
+  y /= 100;
+  z /= 108.883;
+
+  x = x > 0.008856 ? Math.pow(x, 1/3) : (7.787 * x) + (16 / 116);
+  y = y > 0.008856 ? Math.pow(y, 1/3) : (7.787 * y) + (16 / 116);
+  z = z > 0.008856 ? Math.pow(z, 1/3) : (7.787 * z) + (16 / 116);
+
+  l = (116 * y) - 16;
+  a = 500 * (x - y);
+  b = 200 * (y - z);
+
+  return [l, a, b];
+}
+
+function rgb2lch(args) {
+  return lab2lch(rgb2lab(args));
+}
+
+function hsl2rgb(hsl) {
+  var h = hsl[0] / 360,
+      s = hsl[1] / 100,
+      l = hsl[2] / 100,
+      t1, t2, t3, rgb, val;
+
+  if (s == 0) {
+    val = l * 255;
+    return [val, val, val];
+  }
+
+  if (l < 0.5)
+    t2 = l * (1 + s);
+  else
+    t2 = l + s - l * s;
+  t1 = 2 * l - t2;
+
+  rgb = [0, 0, 0];
+  for (var i = 0; i < 3; i++) {
+    t3 = h + 1 / 3 * - (i - 1);
+    t3 < 0 && t3++;
+    t3 > 1 && t3--;
+
+    if (6 * t3 < 1)
+      val = t1 + (t2 - t1) * 6 * t3;
+    else if (2 * t3 < 1)
+      val = t2;
+    else if (3 * t3 < 2)
+      val = t1 + (t2 - t1) * (2 / 3 - t3) * 6;
+    else
+      val = t1;
+
+    rgb[i] = val * 255;
+  }
+
+  return rgb;
+}
+
+function hsl2hsv(hsl) {
+  var h = hsl[0],
+      s = hsl[1] / 100,
+      l = hsl[2] / 100,
+      sv, v;
+  l *= 2;
+  s *= (l <= 1) ? l : 2 - l;
+  v = (l + s) / 2;
+  sv = (2 * s) / (l + s);
+  return [h, sv * 100, v * 100];
+}
+
+function hsl2hwb(args) {
+  return rgb2hwb(hsl2rgb(args));
+}
+
+function hsl2cmyk(args) {
+  return rgb2cmyk(hsl2rgb(args));
+}
+
+function hsl2keyword(args) {
+  return rgb2keyword(hsl2rgb(args));
+}
+
+
+function hsv2rgb(hsv) {
+  var h = hsv[0] / 60,
+      s = hsv[1] / 100,
+      v = hsv[2] / 100,
+      hi = Math.floor(h) % 6;
+
+  var f = h - Math.floor(h),
+      p = 255 * v * (1 - s),
+      q = 255 * v * (1 - (s * f)),
+      t = 255 * v * (1 - (s * (1 - f))),
+      v = 255 * v;
+
+  switch(hi) {
+    case 0:
+      return [v, t, p];
+    case 1:
+      return [q, v, p];
+    case 2:
+      return [p, v, t];
+    case 3:
+      return [p, q, v];
+    case 4:
+      return [t, p, v];
+    case 5:
+      return [v, p, q];
+  }
+}
+
+function hsv2hsl(hsv) {
+  var h = hsv[0],
+      s = hsv[1] / 100,
+      v = hsv[2] / 100,
+      sl, l;
+
+  l = (2 - s) * v;
+  sl = s * v;
+  sl /= (l <= 1) ? l : 2 - l;
+  l /= 2;
+  return [h, sl * 100, l * 100];
+}
+
+function hsv2hwb(args) {
+  return rgb2hwb(hsv2rgb(args))
+}
+
+function hsv2cmyk(args) {
+  return rgb2cmyk(hsv2rgb(args));
+}
+
+function hsv2keyword(args) {
+  return rgb2keyword(hsv2rgb(args));
+}
+
+// http://dev.w3.org/csswg/css-color/#hwb-to-rgb
+function hwb2rgb(hwb) {
+  var h = hwb[0] / 360,
+      wh = hwb[1] / 100,
+      bl = hwb[2] / 100,
+      ratio = wh + bl,
+      i, v, f, n;
+
+  // wh + bl cant be > 1
+  if (ratio > 1) {
+    wh /= ratio;
+    bl /= ratio;
+  }
+
+  i = Math.floor(6 * h);
+  v = 1 - bl;
+  f = 6 * h - i;
+  if ((i & 0x01) != 0) {
+    f = 1 - f;
+  }
+  n = wh + f * (v - wh);  // linear interpolation
+
+  switch (i) {
+    default:
+    case 6:
+    case 0: r = v; g = n; b = wh; break;
+    case 1: r = n; g = v; b = wh; break;
+    case 2: r = wh; g = v; b = n; break;
+    case 3: r = wh; g = n; b = v; break;
+    case 4: r = n; g = wh; b = v; break;
+    case 5: r = v; g = wh; b = n; break;
+  }
+
+  return [r * 255, g * 255, b * 255];
+}
+
+function hwb2hsl(args) {
+  return rgb2hsl(hwb2rgb(args));
+}
+
+function hwb2hsv(args) {
+  return rgb2hsv(hwb2rgb(args));
+}
+
+function hwb2cmyk(args) {
+  return rgb2cmyk(hwb2rgb(args));
+}
+
+function hwb2keyword(args) {
+  return rgb2keyword(hwb2rgb(args));
+}
+
+function cmyk2rgb(cmyk) {
+  var c = cmyk[0] / 100,
+      m = cmyk[1] / 100,
+      y = cmyk[2] / 100,
+      k = cmyk[3] / 100,
+      r, g, b;
+
+  r = 1 - Math.min(1, c * (1 - k) + k);
+  g = 1 - Math.min(1, m * (1 - k) + k);
+  b = 1 - Math.min(1, y * (1 - k) + k);
+  return [r * 255, g * 255, b * 255];
+}
+
+function cmyk2hsl(args) {
+  return rgb2hsl(cmyk2rgb(args));
+}
+
+function cmyk2hsv(args) {
+  return rgb2hsv(cmyk2rgb(args));
+}
+
+function cmyk2hwb(args) {
+  return rgb2hwb(cmyk2rgb(args));
+}
+
+function cmyk2keyword(args) {
+  return rgb2keyword(cmyk2rgb(args));
+}
+
+
+function xyz2rgb(xyz) {
+  var x = xyz[0] / 100,
+      y = xyz[1] / 100,
+      z = xyz[2] / 100,
+      r, g, b;
+
+  r = (x * 3.2406) + (y * -1.5372) + (z * -0.4986);
+  g = (x * -0.9689) + (y * 1.8758) + (z * 0.0415);
+  b = (x * 0.0557) + (y * -0.2040) + (z * 1.0570);
+
+  // assume sRGB
+  r = r > 0.0031308 ? ((1.055 * Math.pow(r, 1.0 / 2.4)) - 0.055)
+    : r = (r * 12.92);
+
+  g = g > 0.0031308 ? ((1.055 * Math.pow(g, 1.0 / 2.4)) - 0.055)
+    : g = (g * 12.92);
+
+  b = b > 0.0031308 ? ((1.055 * Math.pow(b, 1.0 / 2.4)) - 0.055)
+    : b = (b * 12.92);
+
+  r = Math.min(Math.max(0, r), 1);
+  g = Math.min(Math.max(0, g), 1);
+  b = Math.min(Math.max(0, b), 1);
+
+  return [r * 255, g * 255, b * 255];
+}
+
+function xyz2lab(xyz) {
+  var x = xyz[0],
+      y = xyz[1],
+      z = xyz[2],
+      l, a, b;
+
+  x /= 95.047;
+  y /= 100;
+  z /= 108.883;
+
+  x = x > 0.008856 ? Math.pow(x, 1/3) : (7.787 * x) + (16 / 116);
+  y = y > 0.008856 ? Math.pow(y, 1/3) : (7.787 * y) + (16 / 116);
+  z = z > 0.008856 ? Math.pow(z, 1/3) : (7.787 * z) + (16 / 116);
+
+  l = (116 * y) - 16;
+  a = 500 * (x - y);
+  b = 200 * (y - z);
+
+  return [l, a, b];
+}
+
+function xyz2lch(args) {
+  return lab2lch(xyz2lab(args));
+}
+
+function lab2xyz(lab) {
+  var l = lab[0],
+      a = lab[1],
+      b = lab[2],
+      x, y, z, y2;
+
+  if (l <= 8) {
+    y = (l * 100) / 903.3;
+    y2 = (7.787 * (y / 100)) + (16 / 116);
+  } else {
+    y = 100 * Math.pow((l + 16) / 116, 3);
+    y2 = Math.pow(y / 100, 1/3);
+  }
+
+  x = x / 95.047 <= 0.008856 ? x = (95.047 * ((a / 500) + y2 - (16 / 116))) / 7.787 : 95.047 * Math.pow((a / 500) + y2, 3);
+
+  z = z / 108.883 <= 0.008859 ? z = (108.883 * (y2 - (b / 200) - (16 / 116))) / 7.787 : 108.883 * Math.pow(y2 - (b / 200), 3);
+
+  return [x, y, z];
+}
+
+function lab2lch(lab) {
+  var l = lab[0],
+      a = lab[1],
+      b = lab[2],
+      hr, h, c;
+
+  hr = Math.atan2(b, a);
+  h = hr * 360 / 2 / Math.PI;
+  if (h < 0) {
+    h += 360;
+  }
+  c = Math.sqrt(a * a + b * b);
+  return [l, c, h];
+}
+
+function lab2rgb(args) {
+  return xyz2rgb(lab2xyz(args));
+}
+
+function lch2lab(lch) {
+  var l = lch[0],
+      c = lch[1],
+      h = lch[2],
+      a, b, hr;
+
+  hr = h / 360 * 2 * Math.PI;
+  a = c * Math.cos(hr);
+  b = c * Math.sin(hr);
+  return [l, a, b];
+}
+
+function lch2xyz(args) {
+  return lab2xyz(lch2lab(args));
+}
+
+function lch2rgb(args) {
+  return lab2rgb(lch2lab(args));
+}
+
+function keyword2rgb(keyword) {
+  return cssKeywords[keyword];
+}
+
+function keyword2hsl(args) {
+  return rgb2hsl(keyword2rgb(args));
+}
+
+function keyword2hsv(args) {
+  return rgb2hsv(keyword2rgb(args));
+}
+
+function keyword2hwb(args) {
+  return rgb2hwb(keyword2rgb(args));
+}
+
+function keyword2cmyk(args) {
+  return rgb2cmyk(keyword2rgb(args));
+}
+
+function keyword2lab(args) {
+  return rgb2lab(keyword2rgb(args));
+}
+
+function keyword2xyz(args) {
+  return rgb2xyz(keyword2rgb(args));
+}
+
+var cssKeywords = {
+  aliceblue:  [240,248,255],
+  antiquewhite: [250,235,215],
+  aqua: [0,255,255],
+  aquamarine: [127,255,212],
+  azure:  [240,255,255],
+  beige:  [245,245,220],
+  bisque: [255,228,196],
+  black:  [0,0,0],
+  blanchedalmond: [255,235,205],
+  blue: [0,0,255],
+  blueviolet: [138,43,226],
+  brown:  [165,42,42],
+  burlywood:  [222,184,135],
+  cadetblue:  [95,158,160],
+  chartreuse: [127,255,0],
+  chocolate:  [210,105,30],
+  coral:  [255,127,80],
+  cornflowerblue: [100,149,237],
+  cornsilk: [255,248,220],
+  crimson:  [220,20,60],
+  cyan: [0,255,255],
+  darkblue: [0,0,139],
+  darkcyan: [0,139,139],
+  darkgoldenrod:  [184,134,11],
+  darkgray: [169,169,169],
+  darkgreen:  [0,100,0],
+  darkgrey: [169,169,169],
+  darkkhaki:  [189,183,107],
+  darkmagenta:  [139,0,139],
+  darkolivegreen: [85,107,47],
+  darkorange: [255,140,0],
+  darkorchid: [153,50,204],
+  darkred:  [139,0,0],
+  darksalmon: [233,150,122],
+  darkseagreen: [143,188,143],
+  darkslateblue:  [72,61,139],
+  darkslategray:  [47,79,79],
+  darkslategrey:  [47,79,79],
+  darkturquoise:  [0,206,209],
+  darkviolet: [148,0,211],
+  deeppink: [255,20,147],
+  deepskyblue:  [0,191,255],
+  dimgray:  [105,105,105],
+  dimgrey:  [105,105,105],
+  dodgerblue: [30,144,255],
+  firebrick:  [178,34,34],
+  floralwhite:  [255,250,240],
+  forestgreen:  [34,139,34],
+  fuchsia:  [255,0,255],
+  gainsboro:  [220,220,220],
+  ghostwhite: [248,248,255],
+  gold: [255,215,0],
+  goldenrod:  [218,165,32],
+  gray: [128,128,128],
+  green:  [0,128,0],
+  greenyellow:  [173,255,47],
+  grey: [128,128,128],
+  honeydew: [240,255,240],
+  hotpink:  [255,105,180],
+  indianred:  [205,92,92],
+  indigo: [75,0,130],
+  ivory:  [255,255,240],
+  khaki:  [240,230,140],
+  lavender: [230,230,250],
+  lavenderblush:  [255,240,245],
+  lawngreen:  [124,252,0],
+  lemonchiffon: [255,250,205],
+  lightblue:  [173,216,230],
+  lightcoral: [240,128,128],
+  lightcyan:  [224,255,255],
+  lightgoldenrodyellow: [250,250,210],
+  lightgray:  [211,211,211],
+  lightgreen: [144,238,144],
+  lightgrey:  [211,211,211],
+  lightpink:  [255,182,193],
+  lightsalmon:  [255,160,122],
+  lightseagreen:  [32,178,170],
+  lightskyblue: [135,206,250],
+  lightslategray: [119,136,153],
+  lightslategrey: [119,136,153],
+  lightsteelblue: [176,196,222],
+  lightyellow:  [255,255,224],
+  lime: [0,255,0],
+  limegreen:  [50,205,50],
+  linen:  [250,240,230],
+  magenta:  [255,0,255],
+  maroon: [128,0,0],
+  mediumaquamarine: [102,205,170],
+  mediumblue: [0,0,205],
+  mediumorchid: [186,85,211],
+  mediumpurple: [147,112,219],
+  mediumseagreen: [60,179,113],
+  mediumslateblue:  [123,104,238],
+  mediumspringgreen:  [0,250,154],
+  mediumturquoise:  [72,209,204],
+  mediumvioletred:  [199,21,133],
+  midnightblue: [25,25,112],
+  mintcream:  [245,255,250],
+  mistyrose:  [255,228,225],
+  moccasin: [255,228,181],
+  navajowhite:  [255,222,173],
+  navy: [0,0,128],
+  oldlace:  [253,245,230],
+  olive:  [128,128,0],
+  olivedrab:  [107,142,35],
+  orange: [255,165,0],
+  orangered:  [255,69,0],
+  orchid: [218,112,214],
+  palegoldenrod:  [238,232,170],
+  palegreen:  [152,251,152],
+  paleturquoise:  [175,238,238],
+  palevioletred:  [219,112,147],
+  papayawhip: [255,239,213],
+  peachpuff:  [255,218,185],
+  peru: [205,133,63],
+  pink: [255,192,203],
+  plum: [221,160,221],
+  powderblue: [176,224,230],
+  purple: [128,0,128],
+  rebeccapurple: [102, 51, 153],
+  red:  [255,0,0],
+  rosybrown:  [188,143,143],
+  royalblue:  [65,105,225],
+  saddlebrown:  [139,69,19],
+  salmon: [250,128,114],
+  sandybrown: [244,164,96],
+  seagreen: [46,139,87],
+  seashell: [255,245,238],
+  sienna: [160,82,45],
+  silver: [192,192,192],
+  skyblue:  [135,206,235],
+  slateblue:  [106,90,205],
+  slategray:  [112,128,144],
+  slategrey:  [112,128,144],
+  snow: [255,250,250],
+  springgreen:  [0,255,127],
+  steelblue:  [70,130,180],
+  tan:  [210,180,140],
+  teal: [0,128,128],
+  thistle:  [216,191,216],
+  tomato: [255,99,71],
+  turquoise:  [64,224,208],
+  violet: [238,130,238],
+  wheat:  [245,222,179],
+  white:  [255,255,255],
+  whitesmoke: [245,245,245],
+  yellow: [255,255,0],
+  yellowgreen:  [154,205,50]
+};
+
+var reverseKeywords = {};
+for (var key in cssKeywords) {
+  reverseKeywords[JSON.stringify(cssKeywords[key])] = key;
+}
+
+},{}],3:[function(require,module,exports){
+var conversions = require("./conversions");
+
+var convert = function() {
+   return new Converter();
+}
+
+for (var func in conversions) {
+  // export Raw versions
+  convert[func + "Raw"] =  (function(func) {
+    // accept array or plain args
+    return function(arg) {
+      if (typeof arg == "number")
+        arg = Array.prototype.slice.call(arguments);
+      return conversions[func](arg);
+    }
+  })(func);
+
+  var pair = /(\w+)2(\w+)/.exec(func),
+      from = pair[1],
+      to = pair[2];
+
+  // export rgb2hsl and ["rgb"]["hsl"]
+  convert[from] = convert[from] || {};
+
+  convert[from][to] = convert[func] = (function(func) { 
+    return function(arg) {
+      if (typeof arg == "number")
+        arg = Array.prototype.slice.call(arguments);
+      
+      var val = conversions[func](arg);
+      if (typeof val == "string" || val === undefined)
+        return val; // keyword
+
+      for (var i = 0; i < val.length; i++)
+        val[i] = Math.round(val[i]);
+      return val;
+    }
+  })(func);
+}
+
+
+/* Converter does lazy conversion and caching */
+var Converter = function() {
+   this.convs = {};
+};
+
+/* Either get the values for a space or
+  set the values for a space, depending on args */
+Converter.prototype.routeSpace = function(space, args) {
+   var values = args[0];
+   if (values === undefined) {
+      // color.rgb()
+      return this.getValues(space);
+   }
+   // color.rgb(10, 10, 10)
+   if (typeof values == "number") {
+      values = Array.prototype.slice.call(args);        
+   }
+
+   return this.setValues(space, values);
+};
+  
+/* Set the values for a space, invalidating cache */
+Converter.prototype.setValues = function(space, values) {
+   this.space = space;
+   this.convs = {};
+   this.convs[space] = values;
+   return this;
+};
+
+/* Get the values for a space. If there's already
+  a conversion for the space, fetch it, otherwise
+  compute it */
+Converter.prototype.getValues = function(space) {
+   var vals = this.convs[space];
+   if (!vals) {
+      var fspace = this.space,
+          from = this.convs[fspace];
+      vals = convert[fspace][space](from);
+
+      this.convs[space] = vals;
+   }
+  return vals;
+};
+
+["rgb", "hsl", "hsv", "cmyk", "keyword"].forEach(function(space) {
+   Converter.prototype[space] = function(vals) {
+      return this.routeSpace(space, arguments);
+   }
+});
+
+module.exports = convert;
+},{"./conversions":2}],4:[function(require,module,exports){
 !function() {
   var d3 = {
     version: "3.4.11"
@@ -9235,34 +10231,634 @@
   if (typeof define === "function" && define.amd) define(d3); else if (typeof module === "object" && module.exports) module.exports = d3;
   this.d3 = d3;
 }();
-},{}],3:[function(require,module,exports){
-var datacubeSlicer = require('../../dist/datacube.img.slicer.min.js');
+},{}],"datacube-image-slicer":[function(require,module,exports){
+module.exports=require('xAKwk2');
+},{}],"xAKwk2":[function(require,module,exports){
+// inspired by http://jsfiddle.net/splis/VwPL9/
+//             http://bl.ocks.org/mbostock/3074470#heatmap.json
+/* jshint -W040, unused:true */
+(function datacubeSlicerLoader (undefined) {
+    "use strict";
+
+    var pos = {                 // current view position
+            x: null,
+            y: null,
+            z: null
+        },
+        canvasAttrs,
+        colors,     // array, d3.scale for two colors to draw with
+        colorString,
+        colorDrawRGB,          // array, [red, green, blue] of requested colors
+        clr0R, clr0G, clr0B,    // exploded colorsDrawRGB for fast reference
+        debug,
+        d3, d3Canv,
+        gap,                    // px, width between imgs
+        gaugeWidth,             // px, gauge width
+        gaugeDialRadius,    // px, dial raidus
+        cb,                     // callback, onload
+        ctx,                    // canvas context
+        dx, dy, dz,             // px, cube width, height, depth
+        defX, defY, defZ,       // int, default view positions
+        drawPenalty,            // boolean, flags that datacube is not granted to respond to mousemove events
+        drawLock, drawLockPings,// bool, prevents draw events from queueing, number, draw requests while another request is still actively drawn
+        gaugeDialColor,
+        heatmap,                // Array, 3d data to render
+        idleAnimationPercentage,// % (approximate), 1.00 === 100%, 0.50 === 50%, etc
+        idleEnabled,            // Boolean, permit idle animation
+        idleIntvl, idleAniIntvl,// defines time-based idle activity
+        minFrameRenderTime,     // ms, permit at least this time between redraw-calls during animation
+        mo_f, mo_dt, mo_at,     // mouseout function, set once by config init.  ms, delay time, ms, animation time
+        height, width,          // int, canvas dimensions
+        reset, resetInterval,   // Timeout, function to reset panes
+        SS, xS, yS, yS2, zS, hS,// d3 scalars
+        target,                 // Selector, where to place the canvas
+        tmrStart, tmrStop;      // ms, timer markers for measuring browser performance
+
+    if (typeof module !== "undefined" && typeof require !== "undefined") {
+        d3 = require('d3');
+        colorString = require("color-string");
+    } else {
+        if (!window.d3 || !window.colorString) throw new Error("datacube slicer dependencies not met");
+        d3 = window.d3;
+        colorString = window.colorString;
+    }
+
+    /**
+     * Generates a new 3-pane slicer
+     * @param  {Object} config {
+     *     data: 'string' filepath to json/3d data array
+     * }
+     */
+    function datacubeSlicer (config) {
+        var configValue;
+        if (!config || !config.data) {
+            throw new Error("Attempted to build 3d slicer with insufficient config data!");
+        }
+
+        // Default initialization
+        colors = ["black", "white"];
+        drawLock = false;
+        drawLockPings = 0;
+        drawPenalty = false;
+        gap = 5;
+        gaugeWidth = 0;
+        gaugeDialColor = '#000000';
+        gaugeDialRadius = 5;
+        idleAnimationPercentage = 0.25;
+        mo_at = 1000;
+        mo_dt = 500;
+        mo_f = 1;  // 1 => animate mouseout
+        target = "body";
+
+        // User initialization
+        for (var prop in config) {
+            if (config.hasOwnProperty(prop)) {
+                configValue = config[prop];
+                switch(prop) {
+                    case 'canvasAttrs':
+                        canvasAttrs = configValue;
+                        break;
+                    case 'cb':
+                        cb = configValue;
+                        break;
+                    case 'data':
+                        break;
+                    case 'debug':
+                        debug = configValue;
+                        break;
+                    case 'drawColor':
+                        colors[0] = configValue;
+                        break;
+                    case 'gap':
+                        gap = configValue;
+                        break;
+                    case 'gauge':
+                        gaugeWidth = config.gaugeWidth || 20;
+                        break;
+                    case 'gaugeWidth':
+                        gaugeWidth = configValue;
+                        break;
+                    case 'gaugeDialColor':
+                        gaugeDialColor = configValue;
+                        break;
+                    case 'idleAnimation':
+                        idleEnabled = true;
+                        break;
+                    case 'idleAnimationPercentage':
+                        idleAnimationPercentage = configValue;
+                        break;
+                    case 'mouseout':
+                        if (configValue === "slide-to-center") break;
+                        mo_f = 0; // 0 => snapback mouseout
+                        break;
+                    case 'mouseoutAnimationDur':
+                        mo_at = configValue;
+                        break;
+                    case 'mouseoutDelay':
+                        mo_dt = configValue;
+                        break;
+                    case 'target':
+                        target = configValue;
+                        break;
+                    default:
+                        throw new Error("Invalid configuration parameter passed (" +
+                            prop + ")");
+                }
+            }
+        }
+
+        // Post-user init processing
+        colorDrawRGB = colorString.getRgb(colors[0]);
+        clr0R = colorDrawRGB[0];
+        clr0G = colorDrawRGB[1];
+        clr0B = colorDrawRGB[2];
+
+        d3.json(config.data, bootstrap);
+    }
+
+
+
+    /**
+     * Initializes canvas data, environment, and event hanlders
+     * @param  {Error} error - from parsing input JSON
+     * @param  {Array} heatmap - 3d array of 'heat' integers
+     */
+    function bootstrap (error, hm) {
+        if (error) {
+            console.error("Unable to fetch heatmap data");
+            // draw some fail image on the canvas, perhaps reloader button
+            throw error;
+        }
+
+        if (!document.createElement('canvas').getContext) {
+            throw new Error("Your browser is unsupported");
+            // IE polyfill should have been loaded to added canvas API to
+            // old browsers (excanvas.js)
+        }
+
+        // init heatmap vals
+        heatmap = hm;
+        dx = heatmap.length - 1;
+        dy = heatmap[0].length - 1;
+        dz = heatmap[0][0].length - 1;
+        defX = Math.floor(dx/2);
+        defY = Math.floor(dy/2);
+        defZ = Math.floor(dz/2);
+        pos = {
+            x: defX,
+            y: defY,
+            z: defZ
+        };
+        height = d3.max([dx, dz]);
+        width = dy + gap + dy + gap + dx + gap + gaugeWidth + gaugeDialRadius;
+
+        // init scales
+        SS = d3.scale.linear()
+            .range([0, 1, 2, 3, 4, 5, 6, 7, 8])
+            .domain([0, dy, dy+gap, 2*dy+gap, 2*dy+2*gap, 2*dy+2*gap+dx, 2*dy+3*gap+dx, 2*dy+3*gap+dx+gaugeWidth, width]);
+        xS = d3.scale.linear()
+            .domain([0, dx])
+            .range([0, dx]);
+        yS = d3.scale.linear()
+            .domain([0, dy])
+            .range([dy, 0]);
+        yS2 = d3.scale.linear()
+            .domain([0, dy])
+            .range([0, dy]);
+        zS = d3.scale.linear()
+            .domain([0, dz])
+            .range([0, dz]);
+        hS = d3.scale.linear()
+            .domain([0, 255])
+            .range([0, height]);
+        // if (debug) {
+        //     console.log('x, y, z: ', dx, dy, dz);
+        //     console.dir({zones:
+        //         [
+        //             {Z_START: SS.invert(0)},
+        //             {Z_END: SS.invert(1)},
+        //             {GAP_1_START: SS.invert(1)},
+        //             {GAP_1_STOP: SS.invert(2)},
+        //             {Y_START: SS.invert(2)},
+        //             {Y_STOP: SS.invert(3)},
+        //             {GAP_2_START: SS.invert(3)},
+        //             {GAP_2_STOP: SS.invert(4)},
+        //             {X_START: SS.invert(4)},
+        //             {X_STOP: SS.invert(5)},
+        //             {GAP_3_START: SS.invert(5)},
+        //             {GAP_3_STOP: SS.invert(6)},
+        //             {GAUGE_START: SS.invert(6)},
+        //             {GAUGE_STOP: SS.invert(7)},
+        //             {GAUGE_DIAL_START: SS.invert(7)},
+        //             {GAUGE_DIAL_STOP: SS.invert(8)}
+        //         ]
+        //     });
+        // }
+
+        d3Canv = d3.select(target).append("canvas")
+            .attr({
+                "width": width,
+                "height": height,
+                "class": "datacube-slicer"
+            });
+        if (canvasAttrs) {
+            d3Canv.attr(canvasAttrs);
+        }
+        ctx = d3Canv.node().getContext("2d");
+
+        d3Canv.call(timerStart)
+            .call(drawImage, heatmap, 0, 0, dy, height, defZ, 2)
+            .call(drawImage, heatmap, dy+gap, 0, dy, height, defX, 0)
+            .call(drawImage, heatmap, 2*dy+2*gap, 0, dx, height, defY, 1)
+            .call(timerStop)
+            .call(setMinFrameRenderTime)
+            .on('mousemove', mmv)
+            .on('mouseout', mo);
+        if (gaugeWidth) {
+            d3Canv.call(drawGaugeBar, 2*dy+3*gap+dx, 0);
+        }
+
+        idleAnimation(idleEnabled);
+        if (cb) cb();
+    }
+
+
+
+    /**
+     * Removes current value indicator from gauge
+     * @param  {Number=} x - gauge index
+     * @param  {Object} canvas contact
+     */
+    function clearGauge (x) {
+        if (!x) x = Math.floor(SS.invert(7));
+        ctx.clearRect(x,0, gaugeDialRadius, height);
+    }
+
+
+
+    /**
+     * Contrains a value between two bounds
+     * @param  {Number} val
+     * @param  {Number} lowerLimit
+     * @param  {Number} upperLimit
+     * @return {Number}
+     */
+    function constrain (val, lowerLimit, upperLimit) {
+        if (val >= lowerLimit && val <= upperLimit) return val;
+        return Math.max(Math.min(val, upperLimit), lowerLimit);
+    }
+
+
+
+    /**
+     * Paints a gradient gauge to right right of the slice panes
+     * @param  {Canvas} canvas
+     * @param  {Number} sx - shift/x
+     * @param  {Number} sy - shift/y
+     */
+    function drawGaugeBar (canvas, sx) { //,sy
+        var grd=ctx.createLinearGradient(sx, 0, sx, height);
+        grd.addColorStop(0,colors[0]);
+        grd.addColorStop(1,"rgba(" + clr0R + "," + clr0G + "," + clr0B + ",0)");
+        ctx.fillStyle=grd;
+        ctx.fillRect(sx, 0, gaugeWidth, height);
+    }
+
+
+
+    /**
+     * Draws passed data onto the canvas
+     * @param  {Canvas} canvas
+     * @param  {Object} hm - data object
+     * @param  {Number} sx - shift/x
+     * @param  {Number} sy - shift/y
+     * @param  {Number} w  - width
+     * @param  {Number} h  - height
+     * @param  {Number} cc - slice index
+     * @param  {Number} type - chart index.  Key == {x:0, y:1, z:2}
+     */
+    function drawImage(canvas, hm, sx, sy, w, h, cc, type) {
+        var cVal; // variables to store color value
+        cc = Math.floor(cc); // force integer values
+        // array of slicing functions 3D to 2D
+        var fnx = [function(x,y) {return hm[cc][dy-1-y][x];},
+                   function(x,y) {return hm[y][cc][x];},
+                   function(x,y) {return hm[x][dy-1-y][cc];}],
+            // array of ranges for a slice
+            mxs = [[dz,dy],[dz,dx],[dz,dy]],
+
+            sub = fnx[type],
+            maxX= mxs[type][0],
+            maxY= mxs[type][1],
+
+            image = ctx.createImageData(w, h);
+
+        for (var x = 0, p = -1; x < maxX; ++x) {
+            for (var y = 0; y < maxY; ++y) {
+                cVal = sub(x,y) || 0;
+                image.data[++p] = clr0R;
+                image.data[++p] = clr0G ;
+                image.data[++p] = clr0B;
+                image.data[++p] = 255-cVal; //sign(cVal % 255) * 255;
+            }
+        }
+        ctx.putImageData(image, sx, sy);
+    }
+
+
+
+    /**
+     * Enables a periodic sway motion in the mri slicer
+     * canvas to demonstrate it's ability without user
+     * interaction
+     * @param  {Boolean} enable - turn the feature on or off
+     */
+    function idleAnimation (enable) {
+        if (!enable) {
+            if (idleIntvl) clearInterval(idleIntvl);
+            idleIntvl = null;
+            if (idleAniIntvl) clearInterval(idleAniIntvl);
+            idleAniIntvl = null;
+            return;
+        }
+        var smallestAniAxis = d3.min([dx, dy, dz]),
+            defAni, aniPos;
+        // Find smallest axis, learn animation's constraint
+        if (smallestAniAxis === dx) {
+            defAni = defX;
+            aniPos = 'x';
+        } else if (smallestAniAxis === dy) {
+            defAni = defY;
+            aniPos = 'y';
+        } else {
+            defAni = defZ;
+            aniPos = 'z';
+        }
+
+        idleIntvl = setInterval(function scheduleIdleAnimation () {
+            if (idleAniIntvl) return;
+            var moveCount = 0;
+            idleAniIntvl = setInterval(function animateLateralScroll () {
+                if (moveCount < defAni/2) --pos[aniPos];
+                else if (moveCount < defAni*1.5) ++pos[aniPos];
+                else if (moveCount < defAni*2) --pos[aniPos];
+                else {
+                    clearInterval(idleAniIntvl);
+                    idleAniIntvl = null;
+                }
+                drawImage(ctx, heatmap, dy+gap, 0, dy, height, pos[aniPos], 0);
+                drawImage(ctx, heatmap, 2*dy+2*gap+gap, 0, dx, height, pos[aniPos], 1);
+                drawImage(ctx, heatmap, 0, 0, dy, height, pos[aniPos], 2);
+                ++moveCount;
+            }, minFrameRenderTime);
+        }, Math.floor(minFrameRenderTime*defAni*2*(1/idleAnimationPercentage)));
+    }
+
+
+
+    /**
+     * Respond to mouse movement over the canvas
+     */
+    function mmv() {
+        if (drawPenalty) {
+            return;
+        }
+        if (drawLock) {
+            ++drawLockPings;
+            return;
+        }
+        drawLock = true;
+        var self = this,
+            lockDurPenalty = 0,
+            x = constrain(d3.mouse(self)[0], 0, width),
+            y = constrain(d3.mouse(self)[1], 0, height);
+
+        idleAnimation(false);
+
+        // Reset to int values as animations permit non-int positions
+        // Floor per animations and browser zoom permitting decimal values
+        pos.x = Math.floor(pos.x);
+        pos.y = Math.floor(pos.y);
+        pos.z = Math.floor(pos.z);
+        clearInterval(resetInterval);
+        clearTimeout(reset);
+        reset = null;
+
+        switch (Math.ceil(SS(x))) {
+        case 1: // Z
+            pos.x = dx - Math.floor(xS.invert(y));
+            pos.y = Math.floor(yS.invert(x));
+            drawImage(ctx, heatmap, dy+gap, 0, dy, height, pos.x, 0);
+            drawImage(ctx, heatmap, 2*dy+2*gap+gap, 0, dx, height, pos.y, 1);
+            break;
+        case 3: // X
+            pos.z = Math.floor(zS.invert(y));
+            pos.y = dy - Math.floor(yS2.invert(x-dy-gap));
+            drawImage(ctx, heatmap, 0, 0, dy, height, pos.z, 2);
+            drawImage(ctx, heatmap, 2*dy+2*gap+gap, 0, dx, height, pos.y, 1);
+            break;
+        case 5: // Y
+            pos.z = Math.floor(zS.invert(y));
+            pos.x = Math.floor(xS.invert(x-2*dy-2*gap));
+            drawImage(ctx, heatmap, 0, 0, dy, height, pos.z, 2);
+            drawImage(ctx, heatmap, dy+gap, 0, dy, height, pos.x, 0);
+            break;
+        default:
+        }
+        if (gaugeWidth) updateGauge();
+        /* If many move events fired before this function could finish drawing, make note.
+         * Penalize subsequent drawing by permitting the thread to focus elsewhere as clearly
+         * we cannot draw fast enough. */
+        if (drawLockPings) {
+            drawPenalty = true;
+            lockDurPenalty = constrain(drawLockPings * 5, 1, 1000);
+            drawLockPings = 0;
+        }
+        setTimeout(function clearDrawLock () {
+            drawLock = false;
+            drawPenalty = false;
+        }, lockDurPenalty || 0);
+    }
+
+
+
+    /**
+     * Handles mouseout activites for the mri canvas
+     */
+    function mo () {
+        clearGauge();
+        if (mo_f === 1) {
+            if (minFrameRenderTime === undefined) {
+                throw new Error("Cannot animate MRI panes unless a max " +
+                                "refresh rate is defined");
+            }
+            var animationDuration = mo_at, // ms
+                revertFrames = Math.ceil(animationDuration/minFrameRenderTime),
+                revertInc = { // distance incriments for each refresh frame to travel
+                    x: (defX - pos.x)/revertFrames,
+                    y: (defY - pos.y)/revertFrames,
+                    z: (defZ - pos.z)/revertFrames
+                };
+
+            // pauseBeforeReset delays for 500 ms before sliding the mri
+            // images back to their defaults
+            reset = setTimeout(function pauseBeforeReset () {
+                /**
+                 * Animates the MRI panes to their default positions
+                 */
+                resetInterval = setInterval(function animateReset () {
+                    pos.x += revertInc.x;
+                    pos.y += revertInc.y;
+                    pos.z += revertInc.z;
+                    drawImage(ctx, heatmap, dy+gap, 0, dy, height, pos.x, 0);
+                    drawImage(ctx, heatmap, 2*dy+2*gap+gap, 0, dx, height, pos.y, 1);
+                    drawImage(ctx, heatmap, 0, 0, dy, height, pos.z, 2);
+                    --revertFrames;
+                    if (!revertFrames) {
+                        clearInterval(resetInterval);
+                        pos.x = Math.floor(pos.x);
+                        pos.y = Math.floor(pos.y);
+                        pos.z = Math.floor(pos.z);
+                    }
+                }, minFrameRenderTime);
+            }, mo_dt);
+        } else {
+            moSnapBack();
+        }
+        idleAnimation(idleEnabled);
+    }
+
+
+
+    /**
+     * Draws the view of the default point of slice
+     * Called by the mouseout handler, mo()
+     */
+    function moSnapBack () {
+        pos.x = defX;
+        pos.y = defY;
+        pos.z = defZ;
+        drawImage(ctx, heatmap, dy+gap, 0, dy, height, pos.x, 0);
+        drawImage(ctx, heatmap, 2*dy+2*gap+gap, 0, dx, height, pos.y, 1);
+        drawImage(ctx, heatmap, 0, 0, dy, height, pos.z, 2);
+    }
+
+
+
+    /**
+     * Sets the duration that window may spend rendering a given frame
+     * during animation.  Slowest permitted is ~30 FPS (animation ~1s)
+     */
+    function setMinFrameRenderTime () {
+        if (!tmrStart || ! tmrStop) {
+            throw new Error("Timer flags must be set to compute " +
+                            "max animation speed");
+        }
+        minFrameRenderTime = Math.ceil((tmrStop - tmrStart) * 1.5);
+        if (minFrameRenderTime > 33) minFrameRenderTime = 33; // ~30 FPS w/ 1s animation
+        tmrStop = tmrStart = 0;
+    }
+
+
+
+    /**
+     * Gets current UTC timestamp in ms and places into this tmrStart
+     * @return {Number} utc time, ms
+     */
+    function timerStart () {
+        tmrStart = (new Date()).getTime();
+        return tmrStart;
+    }
+
+
+
+    /**
+     * Gets current UTC timestamp in ms and places into this tmrStop
+     * @return {Number} utc time, ms
+     */
+    function timerStop () {
+        tmrStop = (new Date()).getTime();
+        return tmrStop;
+    }
+
+
+
+    /**
+     * Updates the indicator on the gauge bar
+     */
+    function updateGauge () {
+        var x              = Math.floor(SS.invert(7)),
+            radius         = gaugeDialRadius - 2,
+            startAngle     = Math.PI/2,
+            endAngle       = 3*Math.PI/2,
+            guageValue,
+            y;
+        if (heatmap[pos.x] !== undefined &&
+            heatmap[pos.x][pos.y] !== undefined &&
+            heatmap[pos.x][pos.y][pos.z] !== undefined) {
+            guageValue = heatmap[pos.x][pos.y][pos.z]; // avgCubeVal(heatmap, 1, pos.x, pos.y, pos.z),
+            y = Math.floor(hS(guageValue));
+        } else {
+            if (heatmap[pos.x] === undefined) throw new Error("Heatmap has no X coord of " + pos.x);
+            if (heatmap[pos.x][pos.y] === undefined) throw new Error("Heatmap has no Y coord of " + pos.y);
+            if (heatmap[pos.x][pos.y][pos.z] === undefined) throw new Error("Heatmap has no Z coord of " + pos.z);
+        }
+        if (guageValue < 0 || guageValue > 255) {
+            throw new Error("Invalid guageValue detected: " + guageValue);
+        }
+        clearGauge(x);
+        ctx.strokeStyle = gaugeDialColor;
+        console.log(gaugeDialColor);
+        ctx.beginPath();
+        ctx.arc(x + 1, y, radius, startAngle, endAngle, true);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x + 1, y);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+    }
+
+    if (typeof module !== "undefined" && typeof require !== "undefined") {
+        module.exports = datacubeSlicer;
+    } else if (window.datacubeSlicer) {
+        throw new Error("datacubeSlicerdy exists on the window.  Overwriting not permitted.");
+    } else {
+        window.datacubeSlicer = datacubeSlicer;
+    }
+})();
+
+},{"color-string":1,"d3":4}],7:[function(require,module,exports){
+var datacubeSlicer = require('datacube-image-slicer');
 window.onload = function goGoGadgetDatacubeSlicer () {
     var allReady = function () {
         jQuery("#slicer_loading").fadeOut(1000, function fadeMRIslicerIn() {
             var jqC = jQuery("canvas");
-            jQuery("canvas").toggle("slide");
+            jqC.css({"background": "#FFDDFF"}).toggle("slide");
         });
     };
 
     // Config
     //http://en.wikipedia.org/wiki/Magnetic_resonance_imaging
     var mriConfig = {
-        data: "../../sample_data/TT1.json",
-        target: "#canvas_wrapper",
-
+        canvasAttrs: {"id": "interactive_mri"},
         cb: allReady,
-
+        data: "../../sample_data/TT1.json",
+        debug: true,
+        drawColor: "red",
+        gap: 0,
+        gauge: true,
+        gaugeWidth: 50,
+        gaugeDialColor: 'rgb(100,200,200)',
         idleAnimation: true,
         idleAnimationPercentage: 0.3,
-
         mouseout: "slide-to-center",
-        mouseoutDelay: 750,
-        mouseoutAnimationDur: 500
+        mouseoutDelay: 100,
+        mouseoutAnimationDur: 500,
+        target: "#canvas_wrapper",
     };
 
     // Let's do this!
     var mri = new datacubeSlicer(mriConfig);
 };
 
-},{"../../dist/datacube.img.slicer.min.js":1}]},{},[3]);
+},{"datacube-image-slicer":"xAKwk2"}]},{},[7]);
