@@ -572,7 +572,6 @@
         }
         clearGauge(x);
         ctx.strokeStyle = gaugeDialColor;
-        console.log(gaugeDialColor);
         ctx.beginPath();
         ctx.arc(x + 1, y, radius, startAngle, endAngle, true);
         ctx.stroke();

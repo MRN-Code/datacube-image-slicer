@@ -5,6 +5,7 @@
     <title>Axial and dynamic view</title>
     <link rel="stylesheet" type="text/css" href="../../dist/styles.min.css">
     <script src="../../lib/d3.v3.min.js" charset="utf-8"></script>
+    <script src="../../lib/colorStringStandalone.js" charset="utf-8"></script>
     <script src="../../lib/jquery-1.11.1.min.js" charset="utf-8"></script>
     <script src="../../lib/jquery-ui.min.js" charset="utf-8"></script>
     <!--[if IE]>
@@ -24,22 +25,21 @@
             // Config
             //http://en.wikipedia.org/wiki/Magnetic_resonance_imaging
             var mriConfig = {
-                data: "../../sample_data/TT1.json", // The ONLY required property
-                target: "#canvas_wrapper",          // defaults to body
-
-                cb: allReady,                   // callback (passes no data)
-
-                colors: ["red", "green"],       // array, 2 colors to form gradient.  default: black, white
-                gauge: false,
-                gaugeWidth: 50,
-
+                canvasAttrs: {"id": "interactive_mri"},
+                cb: allReady,                       // callback (passes no data)
+                data: "../../sample_data/TT1.json", // The **ONLY** required property
+                drawColor: "blue",                   // "hex", "keyword", or "rgb(...)" accepted.  default: "black"
+                gap: 5,                         // px, gap between panes/gauge. default 5px;
+                gauge: true,                    // displays a gauge that indicates the cube value
+                gaugeWidth: 50,                  // px, default 20
+                gaugeDialColor: "orange",      // "hex", "keyword", or "rgb(...)" accepted.  default: "black"
                 idleAnimation: true,            // simulates a mouse hover to catch the user's eye
                 idleAnimationPercentage: 0.3,   // % (approximate), 1.00 === 100%, 0.50 === 50%, etc.  Note, a safety time buffer is added to each async frame render, but no failsafes are put on this.  90%-100% is not recommended until further proofing is builtin/tested.
-
-                mouseout: "slide-to-center",    // or false for "SnapBack"
-                mouseoutDelay: 750,             // ms, 500 default (useless on SnapBack)
-                mouseoutAnimationDur: 500       // ms, 1000 default (useless on SnapBack)
-            };
+                mouseout: "slide-to-center",    // or false/undefined for "SnapBack"
+                mouseoutDelay: 750,             // ms, default 500 (useless on SnapBack)
+                mouseoutAnimationDur: 500,      // ms, default 1000 (useless on SnapBack)
+                target: "#canvas_wrapper"       // selector, to defaults to body
+        };
 
             // Let's do this!
             var mri = new datacubeSlicer(mriConfig);

@@ -22,8 +22,8 @@ var config = {
         data: "../../sample_data/TT1.json", // The **ONLY** required property
         drawColor: "red",                   // "hex", "keyword", or "rgb(...)" accepted.  default: "black"
         gap: 5,                         // px, gap between panes/gauge. default 5px;
-        gauge: true                     // displays a gauge that indicates the cube value
-        gaugeWidth: 50                   // px, default 20
+        gauge: true,                    // displays a gauge that indicates the cube value
+        gaugeWidth: 50,                 // px, default 20
         gaugeDialColor: "#123456",      // "hex", "keyword", or "rgb(...)" accepted.  default: "black"
         idleAnimation: true,            // simulates a mouse hover to catch the user's eye
         idleAnimationPercentage: 0.3,   // % (approximate), 1.00 === 100%, 0.50 === 50%, etc.  Note, a safety time buffer is added to each async frame render, but no failsafes are put on this.  90%-100% is not recommended until further proofing is builtin/tested.
@@ -47,7 +47,7 @@ var config = {
 
 ## Gotchas
 * Set a background color explicitly on the canvas to produce predectable transparency from each draw
-* Large datasets yield large files.  Prune 0s then whitespace (assuming your arrays were pretty printed [10, 0, 0, 5, ...]:
+
 * Do *not* pad the canvas as it biases the mouse position readings.
 
 ## ToDo
