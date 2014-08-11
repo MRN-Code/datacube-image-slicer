@@ -32,7 +32,7 @@
     "type": "git",
     "url": "https://github.com/MRN-Code/datacube-image-slicer.git"
   },
-  "version": "0.0.3",
+  "version": "0.0.5",
   "dependencies": {
     "d3": "^3.4.11",
     "color-string": "^0.2.1"

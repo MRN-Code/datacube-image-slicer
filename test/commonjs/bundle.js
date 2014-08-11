@@ -10269,12 +10269,15 @@ module.exports=require('xAKwk2');
         invertTransparency,     // inverts transparency scale
         minFrameRenderTime,     // ms, permit at least this time between redraw-calls during animation
         mo_f, mo_dt, mo_at,     // mouseout function, set once by config init.  ms, delay time, ms, animation time
+        currPane,               // pane that the mouse is hovering over
         penaltyMs,              // millisecond penalty incurred for each duplicate draw request while actively drawing
         height, width,          // int, canvas dimensions
         reset, resetInterval,   // Timeout, function to reset panes
         SS, xS, yS, yS2, zS, hS,// d3 scalars
         target,                 // Selector, where to place the canvas
-        tmrStart, tmrStop;      // ms, timer markers for measuring browser performance
+        transparentExtremes,    // Makes 0 && 255 values transparent.  also hides gauge at extremes
+        tmrStart, tmrStop,      // ms, timer markers for measuring browser performance
+        updatePanes;
 
     if (typeof module !== "undefined" && typeof require !== "undefined") {
         d3 = require('d3');
@@ -10312,6 +10315,7 @@ module.exports=require('xAKwk2');
         mo_dt = 500;
         mo_f = 1;  // 1 => animate mouseout
         target = "body";
+        updatePanes = [0, 2, 4];
 
         // User initialization
         for (var prop in config) {
@@ -10345,7 +10349,7 @@ module.exports=require('xAKwk2');
                         gaugeDialColor = configValue;
                         break;
                     case 'idleAnimation':
-                        idleEnabled = configValue;
+                        idleEnabled = !!configValue;
                         break;
                     case 'idleAnimationPercentage':
                         idleAnimationPercentage = configValue;
@@ -10365,6 +10369,9 @@ module.exports=require('xAKwk2');
                         break;
                     case 'target':
                         target = configValue;
+                        break;
+                    case 'transparentExtremes':
+                        transparentExtremes = !!configValue;
                         break;
                     default:
                         throw new Error("Invalid configuration parameter passed (" +
@@ -10565,7 +10572,11 @@ module.exports=require('xAKwk2');
                 image.data[++p] = clr0R;
                 image.data[++p] = clr0G ;
                 image.data[++p] = clr0B;
-                image.data[++p] = invertTransparency ? 255 - cVal : cVal;
+                image.data[++p] = transparentExtremes ?
+                    cVal === 0 ?
+                        0 :
+                        cVal === 255 ? 0 : invertTransparency ? 255 - cVal : cVal :
+                    invertTransparency ? 255 - cVal : cVal;
             }
         }
         ctx.putImageData(image, sx, sy);
@@ -10626,6 +10637,10 @@ module.exports=require('xAKwk2');
      * Respond to mouse movement over the canvas
      */
     function mmv() {
+        var self = this,
+            lockDurPenalty = 0,
+            x = constrain(d3.mouse(self)[0], 0, width),
+            y = constrain(d3.mouse(self)[1], 0, height);
         if (drawPenalty) {
             return;
         }
@@ -10633,11 +10648,9 @@ module.exports=require('xAKwk2');
             ++drawLockPings;
             return;
         }
+        currPane = SS(x);
+        if (updatePanes.indexOf(Math.floor(currPane)) < 0) return;  // don't update unless mouse is over pane
         drawLock = true;
-        var self = this,
-            lockDurPenalty = 0,
-            x = constrain(d3.mouse(self)[0], 0, width),
-            y = constrain(d3.mouse(self)[1], 0, height);
 
         idleAnimation(false);
 
@@ -10809,10 +10822,8 @@ module.exports=require('xAKwk2');
             if (heatmap[pos.x][pos.y] === undefined) throw new Error("Heatmap has no Y coord of " + pos.y);
             if (heatmap[pos.x][pos.y][pos.z] === undefined) throw new Error("Heatmap has no Z coord of " + pos.z);
         }
-        if (guageValue < 0 || guageValue > 255) {
-            throw new Error("Invalid guageValue detected: " + guageValue);
-        }
         clearGauge(x);
+        if (transparentExtremes && (guageValue === 0 || guageValue === 255)) return;
         ctx.strokeStyle = gaugeDialColor;
         ctx.beginPath();
         ctx.arc(x + 1, y, radius, startAngle, endAngle, true);

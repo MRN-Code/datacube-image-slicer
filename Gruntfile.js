@@ -29,6 +29,11 @@ module.exports = function (grunt) {
             files: {
               'dist/styles.min.css': ['src/styles.css']
             }
+          },
+          combineAlt: {
+            files: {
+              'dist/stylesAlt.min.css': ['src/stylesAlt.css']
+            }
           }
         },
         uglify: {
