@@ -30,8 +30,10 @@
         idleAnimationPercentage,// % (approximate), 1.00 === 100%, 0.50 === 50%, etc
         idleEnabled,            // Boolean, permit idle animation
         idleIntvl, idleAniIntvl,// defines time-based idle activity
+        invertTransparency,     // inverts transparency scale
         minFrameRenderTime,     // ms, permit at least this time between redraw-calls during animation
         mo_f, mo_dt, mo_at,     // mouseout function, set once by config init.  ms, delay time, ms, animation time
+        penaltyMs,              // millisecond penalty incurred for each duplicate draw request while actively drawing
         height, width,          // int, canvas dimensions
         reset, resetInterval,   // Timeout, function to reset panes
         SS, xS, yS, yS2, zS, hS,// d3 scalars
@@ -69,6 +71,7 @@
         gaugeDialColor = '#000000';
         gaugeDialRadius = 5;
         idleAnimationPercentage = 0.25;
+        penaltyMs = 2;
         mo_at = 1000;
         mo_dt = 500;
         mo_f = 1;  // 1 => animate mouseout
@@ -106,10 +109,13 @@
                         gaugeDialColor = configValue;
                         break;
                     case 'idleAnimation':
-                        idleEnabled = true;
+                        idleEnabled = configValue;
                         break;
                     case 'idleAnimationPercentage':
                         idleAnimationPercentage = configValue;
+                        break;
+                    case 'invertTransparency':
+                        invertTransparency = true;
                         break;
                     case 'mouseout':
                         if (configValue === "slide-to-center") break;
@@ -323,7 +329,7 @@
                 image.data[++p] = clr0R;
                 image.data[++p] = clr0G ;
                 image.data[++p] = clr0B;
-                image.data[++p] = 255-cVal; //sign(cVal % 255) * 255;
+                image.data[++p] = invertTransparency ? 255 - cVal : cVal;
             }
         }
         ctx.putImageData(image, sx, sy);
@@ -431,11 +437,11 @@
         }
         if (gaugeWidth) updateGauge();
         /* If many move events fired before this function could finish drawing, make note.
-         * Penalize subsequent drawing by permitting the thread to focus elsewhere as clearly
+         * Penalize subsequent drawing by permitting the thread to focus elsewhere as
          * we cannot draw fast enough. */
         if (drawLockPings) {
             drawPenalty = true;
-            lockDurPenalty = constrain(drawLockPings * 5, 1, 1000);
+            lockDurPenalty = constrain(drawLockPings * penaltyMs, 1, 50);
             drawLockPings = 0;
         }
         setTimeout(function clearDrawLock () {
