@@ -21,6 +21,7 @@ window.onload = function goGoGadgetDatacubeSlicer () {
         gaugeDialColor: 'rgb(100,200,200)',
         idleAnimation: true,
         idleAnimationPercentage: 0.3,
+        invertTransparency: true,
         mouseout: "slide-to-center",
         mouseoutDelay: 100,
         mouseoutAnimationDur: 500,

@@ -26,7 +26,8 @@ var config = {
         gaugeWidth: 50,                 // px, default 20
         gaugeDialColor: "#123456",      // "hex", "keyword", or "rgb(...)" accepted.  default: "black"
         idleAnimation: true,            // simulates a mouse hover to catch the user's eye
-        idleAnimationPercentage: 0.3,   // % (approximate), 1.00 === 100%, 0.50 === 50%, etc.  Note, a safety time buffer is added to each async frame render, but no failsafes are put on this.  90%-100% is not recommended until further proofing is builtin/tested.
+        idleAnimationPercentage: 0.3,   // % (**approximate**), 1.00 === 100%, 0.50 === 50%, etc. Note, a safety time buffer is added to each async frame render, but no failsafes are put on this.  90%-100% is not recommended until further proofing is builtin/tested.
+        invertTransparency: true,       // default: values 255 => 1.0 opaque alpha & 0 => fully transparent
         mouseout: "slide-to-center",    // or false/undefined for "SnapBack"
         mouseoutDelay: 750,             // ms, default 500 (useless on SnapBack)
         mouseoutAnimationDur: 500,      // ms, default 1000 (useless on SnapBack)
@@ -52,7 +53,6 @@ var config = {
 
 ## ToDo
 * Critique.  This is my first grunt/browserify module.  I would love some constructive feedback on code structure for both the build process & general code layout
-* More mouseout animations
 * Rearrange panes and flip axis
 * Testing
 
