@@ -10,9 +10,12 @@ Generates an interactive 3-paned image 'slicer' from a three dimensional data ar
 * Clone this repo, `git clone https://github.com/MRN-Code/datacube-image-slicer.git` then `cd` into the cloned directory
 * `npm install` to install the dependencies
 * `grunt` to build the js
-* Build a config object, as described below
-* Build the pane: ```var slicedImagePane = new datacubeSlicer(config);```
-* Test!  Sample .json data is included in the sample_data/ directory.
+
+## Usage
+* Prepare your datacube array.  If values are not normalized from 0-255, you must normalize them.  See normalization example below.
+* Build a config object.  See config example below.
+* Build the pane: `var slicedImagePane = new datacubeSlicer(config);`
+* Test in the browser!  Sample .json data is included in the sample_data/ directory.  Additionally, ./test/commonjs/index.html has a functional example ready to play with.
 
 ## Configure
 ```javascript
@@ -27,7 +30,7 @@ var config = {
         gaugeDialColor: "#123456",      // "hex", "keyword", or "rgb(...)" accepted.  default: "black"
         idleAnimation: true,            // simulates a mouse hover to catch the user's eye
         idleAnimationPercentage: 0.3,   // % (**approximate**), 1.00 === 100%, 0.50 === 50%, etc. Note, a safety time buffer is added to each async frame render, but no failsafes are put on this.  90%-100% is not recommended until further proofing is builtin/tested.
-        invertTransparency: true,       // default: values 255 => 1.0 opaque alpha & 0 => fully transparent
+        invertTransparency: true,       // default: false.  True points values 255 to fully opaque (alpha of 1.0) and 0 => fully transparent
         mouseout: "slide-to-center",    // or false/undefined for "SnapBack"
         mouseoutDelay: 750,             // ms, default 500 (useless on SnapBack)
         mouseoutAnimationDur: 500,      // ms, default 1000 (useless on SnapBack)
@@ -46,6 +49,49 @@ var config = {
   * [color-string](https://github.com/cdaringe/color-string) `colorStringStandalone.js` must be loaded on the window scope
 * Load excanvas for old IE canvas support.
 
+## Normalization
+```js
+// Normalization process
+
+// Small 2x2x2 datacube for demonstration
+// Suppose your data ranges from 5 - 75
+var myDataCube = [ // x
+    [ // x[0]
+        [ // (y) x[0][0]
+            5,
+            45 // (z) x[0][0][1]
+        ], [
+            38,
+            6
+        ]
+    ], [
+        [
+            20,
+            50
+        ],
+        [
+            75,
+            60
+        ],
+    ]
+];
+
+function scale0_255 (val, oldMin, oldMax) {
+    if (val === undefined || val === null) return 0;
+    if (val < oldMin || val > oldMax) {
+        throw new Error("Input value " + val + " is not within expected data range");
+    }
+    return Math.floor((255 * (val-oldMin))/(oldMax-oldMin));
+}
+
+for (var x in myDataCube) {
+    for (var y in myDataCube[x]) {
+        for (var z in myDataCube[x][y]) {
+            myDataCube[x][y][z] = scale0_255(myDataCube[x][y][z], 5, 75);
+        }
+    }
+}
+```
 ## Gotchas
 * Set a background color explicitly on the canvas to produce predectable transparency from each draw
 
