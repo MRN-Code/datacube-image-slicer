@@ -29,7 +29,7 @@
                 canvasAttrs: {"id": "interactive_mri"},
                 cb: allReady,                       // callback (passes no data)
                 data: "../../sample_data/TT1.json", // The **ONLY** required property
-                gauge: true,                    // displays a gauge that indicates the cube value
+                gauge: false,                    // displays a gauge that indicates the cube value
                 idleAnimation: false,            // simulates a mouse hover to catch the user's eye
                 idleAnimationPercentage: 0.3,   // % (**approximate**), 1.00 === 100%, 0.50 === 50%, etc. Note, a safety time buffer is added to each async frame render, but no failsafes are put on this.  90%-100% is not recommended until further proofing is builtin/tested.
                 invertTransparency: true,       // default: values 255 => 1.0 opaque alpha & 0 => fully transparent

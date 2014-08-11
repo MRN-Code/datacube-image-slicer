@@ -104,7 +104,9 @@
                         gap = configValue;
                         break;
                     case 'gauge':
-                        gaugeWidth = config.gaugeWidth || 20;
+                        if (!!configValue) {
+                            gaugeWidth = config.gaugeWidth || 20;
+                        }
                         break;
                     case 'gaugeWidth':
                         gaugeWidth = configValue;
