@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <title>Axial and dynamic view</title>
-    <link rel="stylesheet" type="text/css" href="../../dist/stylesAlt.min.css">
+    <link rel="stylesheet" type="text/css" href="../../dist/styles.min.css">
     <script src="../../lib/d3.v3.min.js" charset="utf-8"></script>
     <script src="../../lib/colorStringStandalone.js" charset="utf-8"></script>
     <script src="../../lib/jquery-1.11.1.min.js" charset="utf-8"></script>
@@ -18,9 +18,8 @@
             var allReady = function () {
                 jQuery("#slicer_loading").fadeOut(1000, function fadeMRIslicerIn() {
                     var jqC = jQuery("canvas");
-                    jqC.toggle("slide");
+                    jqC.css({"background": "#FFDD00"}).toggle("slide");
                 });
-                jQuery('body').css({"background":"#F5F5F5"});
             }
 
             // Config
@@ -29,15 +28,18 @@
                 canvasAttrs: {"id": "interactive_mri"},
                 cb: allReady,                       // callback (passes no data)
                 data: "../../sample_data/TT1.json", // The **ONLY** required property
+                drawColor: "red",                   // "hex", "keyword", or "rgb(...)" accepted.  default: "black"
+                gap: 5,                         // px, gap between panes/gauge. default 5px;
                 gauge: true,                    // displays a gauge that indicates the cube value
+                gaugeWidth: 50,                 // px, default 20
+                gaugeDialColor: "#123456",      // "hex", "keyword", or "rgb(...)" accepted.  default: "black"
                 idleAnimation: false,            // simulates a mouse hover to catch the user's eye
-                idleAnimationPercentage: 0.3,   // % (**approximate**), 1.00 === 100%, 0.50 === 50%, etc. Note, a safety time buffer is added to each async frame render, but no failsafes are put on this.  90%-100% is not recommended until further proofing is builtin/tested.
+                idleAnimationPercentage: 1,   // % (**approximate**), 1.00 === 100%, 0.50 === 50%, etc. Note, a safety time buffer is added to each async frame render, but no failsafes are put on this.  90%-100% is not recommended until further proofing is builtin/tested.
                 invertTransparency: true,       // default: values 255 => 1.0 opaque alpha & 0 => fully transparent
                 mouseout: "slide-to-center",    // or false/undefined for "SnapBack"
-                mouseoutDelay: 300  ,             // ms, default 500 (useless on SnapBack)
+                mouseoutDelay: 750,             // ms, default 500 (useless on SnapBack)
                 mouseoutAnimationDur: 500,      // ms, default 1000 (useless on SnapBack)
-                target: "#canvas_wrapper",       // selector, to defaults to body
-                transparentExtremes: true
+                target: "#canvas_wrapper"       // selector, to defaults to body
             };
 
             // Let's do this!
