@@ -34,7 +34,8 @@ var config = {
         mouseout: "slide-to-center",    // or false/undefined for "SnapBack"
         mouseoutDelay: 750,             // ms, default 500 (useless on SnapBack)
         mouseoutAnimationDur: 500,      // ms, default 1000 (useless on SnapBack)
-        target: "#canvas_wrapper"       // selector, to defaults to body
+        target: "#canvas_wrapper",      // selector, to defaults to body
+        transparentExtremes: false      // default: false.  0 & 255 values are transparent
 };
 ```
 
